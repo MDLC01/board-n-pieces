@@ -1,0 +1,8 @@
+[package]
+name = "board-n-pieces"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Malo <@MDLC01>"]
+description = "Display chessboards in Typst."
+compiler = "0.11.0"
+exclude = ["tests.typ"]
