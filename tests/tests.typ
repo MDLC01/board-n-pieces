@@ -1,8 +1,13 @@
-#import "lib.typ": *
+// Tests to the package's public interface.
+#include "api.typ"
 
+
+// Other tests.
+
+#import "../target/lib.typ": *
 
 #let test-abi() = {
-  import "abi.typ": *
+  import "../target/abi.typ": *
 
   let test(value, to-bytes, from-bytes) = {
     let (remainder, new-value) = from-bytes(to-bytes(value))
@@ -84,3 +89,5 @@
 
   test(starting-position, position-to-bytes, position-from-bytes)
 }
+
+#test-abi()

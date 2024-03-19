@@ -9,6 +9,8 @@ This project consists of a Typst library and a plugin written in Rust. Sources f
 
 This project can be built into a proper Typst package by [`build.py`](build.py).
 
+The [`tests/`](tests/) directory contains a small test suite.
+
 
 ## Usage
 
