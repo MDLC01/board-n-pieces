@@ -1,4 +1,4 @@
-# Board & pieces
+# Board & Pieces
 
 This is a [Typst] package to display chessboards.
 
