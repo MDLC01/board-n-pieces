@@ -24,10 +24,21 @@
 ///   "RNBQKBNR",
 /// )
 /// ```
-#let position(board) = (
-  type: "boardnpieces:position",
-  board: board,
+#let position(..ranks) = (
   ..starting-position,
+  board: ranks.pos()
+    .rev()
+    .map(rank => {
+      let squares = ()
+      for square in rank {
+        if square in (" ", ".") {
+          squares.push(none)
+        } else {
+          squares.push(square)
+        }
+      }
+      squares
+    }),
 )
 
 
@@ -71,7 +82,6 @@
   highlighted-black-square-color: rgb("E5694E"),
   /// How to display each piece.
   pieces: (
-    // TODO: Does this work when this is used as a package?
     P: image("assets/pw.svg", width: 100%),
     N: image("assets/nw.svg", width: 100%),
     B: image("assets/bw.svg", width: 100%),
