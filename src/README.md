@@ -2,6 +2,7 @@
 
 Display chessboards in Typst.
 
+
 ## Displaying chessboards
 
 The main function of this package is `display-board`. It lets you display a specific position on a board.

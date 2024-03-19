@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 LICENSE = Path('LICENSE')
+CHANGELOG = Path('CHANGELOG.md')
 TARGET_DIR = Path('target/')
 
 
@@ -55,21 +56,24 @@ def build_readme():
     README = Path('README.md')
     EXAMPLES_DIR = Path('examples')
 
+    final_lines = []
+
     with open(TARGET_DIR.joinpath(README)) as f:
-        readme = f.read()
+        initial_readme = f.read()
+
+    # Build examples
 
     examples = []
-    new_lines = []
     example = []
     is_example = False
-    for line in readme.splitlines():
-        new_lines.append(line)
+    for line in initial_readme.splitlines():
+        final_lines.append(line)
         if is_example and line.startswith('```'):
             is_example = False
             examples.append('\n'.join(example))
-            new_lines.append('')
-            new_lines.append(f'![image](examples/example-{len(examples)}.png)')
-            new_lines.append('')
+            final_lines.append('')
+            final_lines.append(f'![image](examples/example-{len(examples)}.png)')
+            final_lines.append('')
         elif is_example:
             example.append(line)
         elif line.startswith('```example'):
@@ -92,8 +96,23 @@ def build_readme():
         check=True,
     )
 
+    # Add changelog
+
+    with open(CHANGELOG) as f:
+        initial_changelog = f.read()
+
+    final_lines.append('')
+    final_lines.append('')
+    for line in initial_changelog.splitlines():
+        if line.startswith('#'):
+            final_lines.append('#' + line)
+        else:
+            final_lines.append(line)
+
+    # Write README
+
     with open(TARGET_DIR.joinpath(README), 'w') as f:
-        f.write('\n'.join(new_lines))
+        f.write('\n'.join(final_lines))
 
 
 def main():
