@@ -1,30 +1,5 @@
 /// Chess pieces symbols.
-#let pieces = (
-  pawn: symbol(
-    ("black", "♟"),
-    ("white", "♙"),
-  ),
-  knight: symbol(
-    ("black", "♞"),
-    ("white", "♘"),
-  ),
-  bishop: symbol(
-    ("black", "♝"),
-    ("white", "♗"),
-  ),
-  rook: symbol(
-    ("black", "♜"),
-    ("white", "♖"),
-  ),
-  queen: symbol(
-    ("black", "♛"),
-    ("white", "♕"),
-  ),
-  king: symbol(
-    ("black", "♚"),
-    ("white", "♔"),
-  ),
-)
+#import "chess-sym.typ"
 
 
 /// The starting position of a standard chess game.
