@@ -19,7 +19,9 @@ def read_exclude_file(path: Path) -> list[str]:
     return [os.path.normcase(entry) for entry in lines if entry and not entry.startswith('#')]
 
 
-def clone_sources():
+def copy_library():
+    print('Copying library...')
+
     LIBRARY_DIR = Path('src/')
     EXCLUDE_FILE = LIBRARY_DIR.joinpath('.exclude')
 
@@ -38,6 +40,8 @@ def clone_sources():
 
 
 def build_plugin():
+    print('Building plugin...')
+
     BUILD_TARGET = 'wasm32-unknown-unknown'
     PLUGIN_DIR = Path('plugin/')
     PLUGIN_PATH = PLUGIN_DIR.joinpath('target', BUILD_TARGET, 'release', 'board_n_pieces_plugin.wasm')
@@ -53,6 +57,8 @@ def build_plugin():
 
 
 def build_readme():
+    print('Building README...')
+
     README = Path('README.md')
     EXAMPLES_DIR = Path('examples')
 
@@ -120,7 +126,7 @@ def main():
         shutil.rmtree(TARGET_DIR)
     TARGET_DIR.mkdir(parents=True)
 
-    clone_sources()
+    copy_library()
     build_plugin()
     build_readme()
 
