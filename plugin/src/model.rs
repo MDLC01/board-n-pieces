@@ -56,13 +56,12 @@ impl Rank {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Abi)]
+#[abi(name = "square")]
 pub struct Square {
     file: File,
     rank: Rank,
 }
-
-abi!(Square as "square" { file, rank });
 
 #[derive(Debug, Copy, Clone)]
 pub enum Color {
@@ -319,7 +318,8 @@ impl ByteAbi for CastlingAvailabilities {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Abi)]
+#[abi(name = "position")]
 pub struct Position {
     pub board: Board,
     pub active: Color,
@@ -328,15 +328,6 @@ pub struct Position {
     pub halfmove: u32,
     pub fullmove: u32,
 }
-
-abi!(Position as "position" {
-    board,
-    active,
-    castling_availabilities,
-    en_passant_target_square,
-    halfmove,
-    fullmove,
-});
 
 impl Position {
     pub fn default_with_board(board: Board) -> Self {

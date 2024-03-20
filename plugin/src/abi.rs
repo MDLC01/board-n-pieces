@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 use std::iter;
 
+pub use macros::Abi;
+
 pub type Result<T> = std::result::Result<T, String>;
 
 pub trait Abi: Sized {
@@ -119,55 +121,6 @@ impl<T: Abi> Abi for Option<T> {
         match self {
             None => vec![0],
             Some(v) => iter::once(0).chain(v.to_bytes()).collect(),
-        }
-    }
-}
-
-#[macro_export]
-macro_rules! abi {
-    (
-        $type:ty as $name:literal {
-            $( $field:ident ), * $(,)?
-        }
-    ) => {
-        impl $crate::abi::Abi for $type {
-            fn descriptor() -> Cow<'static, str> {
-                $name.into()
-            }
-
-            fn from_bytes(bytes: &mut impl Iterator<Item = u8>) -> abi::Result<Self> {
-                Ok(Self {
-                    $( $field: <_ as $crate::abi::Abi>::from_bytes(bytes)?, ) +
-                })
-            }
-
-            fn to_bytes(self) -> impl Iterator<Item = u8> {
-                iter::empty()
-                    $( .chain($crate::abi::Abi::to_bytes(self.$field)) ) +
-            }
-        }
-    };
-
-    (
-        $type:ty {
-            $( $field:ident ), * $(,)?
-        }
-    ) => {
-        impl $crate::abi::Abi for $type {
-            fn descriptor() -> Cow<'static, str> {
-                stringify!($type).into()
-            }
-
-            fn from_bytes(bytes: &mut impl Iterator<Item = u8>) -> abi::Result<Self> {
-                Ok(Self {
-                    $( $field: <_ as $crate::abi::Abi>::from_bytes(bytes)?, ) +
-                })
-            }
-
-            fn to_bytes(self) -> impl Iterator<Item = u8> {
-                iter::empty()
-                    $( .chain($crate::abi::Abi::to_bytes(self.$field)) ) +
-            }
         }
     }
 }
