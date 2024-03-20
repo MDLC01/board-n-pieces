@@ -5,10 +5,10 @@ Display chessboards in Typst.
 
 ## Displaying chessboards
 
-The main function of this package is `display-board`. It lets you display a specific position on a board.
+The main function of this package is `board`. It lets you display a specific position on a board.
 
 ```example
-#display-board(starting-position)
+#board(starting-position)
 ```
 
 `starting-position` is a position that is provided by the package. It represents the initial position of a chess game.
@@ -16,7 +16,7 @@ The main function of this package is `display-board`. It lets you display a spec
 You can create a different position using the `position` function. It accepts strings representing each rank. Use upper-case letters for white pieces, and lower-case letters for black pieces. Dots and spaces correspond to empty squares.
 
 ```example
-#display-board(position(
+#board(position(
   "....r...",
   "........",
   "..p..PPk",
@@ -31,19 +31,19 @@ You can create a different position using the `position` function. It accepts st
 Alternatively, you can use the `fen` function to create a position from a [FEN](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation) string:
 
 ```example
-#display-board(fen("r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1 b - - 1 23"))
+#board(fen("r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1 b - - 1 23"))
 ```
 
 Note that you can also specify only the first part of the FEN string:
 
 ```example
-#display-board(fen("r4rk1/pp2Bpbp/1qp3p1/8/2BP2b1/Q1n2N2/P4PPP/3RK2R"))
+#board(fen("r4rk1/pp2Bpbp/1qp3p1/8/2BP2b1/Q1n2N2/P4PPP/3RK2R"))
 ```
 
 
 ## Customizing a chessboard
 
-The `display-board` function lets you customize the appearance of the board with multiple arguments. They are described below.
+The `board` function lets you customize the appearance of the board with multiple arguments. They are described below.
 
 - `highlighted-squares` is a list of squares to highlight (e.g. `("d3", "d2", "e3")`).
 

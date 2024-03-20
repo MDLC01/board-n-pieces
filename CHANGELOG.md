@@ -2,7 +2,7 @@
 
 ## Version 0.1.0 (initial version)
 
-- Display a chess position on a chessboard with the `display-board` function.
+- Display a chess position on a chessboard with the `board` function.
 
 - Get the starting position with `starting-position`.
 
