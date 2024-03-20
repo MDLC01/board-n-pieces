@@ -8,9 +8,12 @@ import subprocess
 from pathlib import Path
 
 
+LIBRARY_DIR = Path('src/')
+PLUGIN_DIR = Path('plugin/')
+TARGET_DIR = Path('target/')
 LICENSE = Path('LICENSE')
 CHANGELOG = Path('CHANGELOG.md')
-TARGET_DIR = Path('target/')
+README = 'README.md'
 
 
 def read_exclude_file(path: Path) -> list[str]:
@@ -22,11 +25,11 @@ def read_exclude_file(path: Path) -> list[str]:
 def copy_library():
     print('Copying library...')
 
-    LIBRARY_DIR = Path('src/')
     EXCLUDE_FILE = LIBRARY_DIR.joinpath('.exclude')
 
     excluded_files = read_exclude_file(EXCLUDE_FILE)
     excluded_files.append(os.path.normcase(EXCLUDE_FILE.relative_to(LIBRARY_DIR)))
+    excluded_files.append(os.path.normcase(LIBRARY_DIR.joinpath(README)))
 
     for path, directories, files in os.walk(LIBRARY_DIR):
         for file in files:
@@ -43,7 +46,6 @@ def build_plugin():
     print('Building plugin...')
 
     BUILD_TARGET = 'wasm32-unknown-unknown'
-    PLUGIN_DIR = Path('plugin/')
     PLUGIN_PATH = PLUGIN_DIR.joinpath('target', BUILD_TARGET, 'release', 'board_n_pieces_plugin.wasm')
     PLUGIN_NAME = 'plugin.wasm'
 
@@ -59,12 +61,11 @@ def build_plugin():
 def build_readme():
     print('Building README...')
 
-    README = Path('README.md')
     EXAMPLES_DIR = Path('examples')
 
     final_lines = []
 
-    with open(TARGET_DIR.joinpath(README)) as f:
+    with open(LIBRARY_DIR.joinpath(README)) as f:
         initial_readme = f.read()
 
     # Build examples
@@ -73,18 +74,22 @@ def build_readme():
     example = []
     is_example = False
     for line in initial_readme.splitlines():
-        final_lines.append(line)
         if is_example and line.startswith('```'):
             is_example = False
             examples.append('\n'.join(example))
+            final_lines.append(line)
             final_lines.append('')
             final_lines.append(f'![image](examples/example-{len(examples)}.png)')
             final_lines.append('')
         elif is_example:
+            final_lines.append(line)
             example.append(line)
         elif line.startswith('```example'):
+            final_lines.append('```typ')
             is_example = True
             example = []
+        else:
+            final_lines.append(line)
 
     example_source = [
         f'#import "lib.typ": *;',
