@@ -19,4 +19,4 @@ For more information on how to use this package, take a look at [`src/README.md`
 
 ## License
 
-The contents of this repository are licensed under the [MIT License](LICENSE), except for the chess pieces under [`src/assets/`](src/assets/). Those are licensed under the [GNU Free Documentation License](src/assets/LICENSE). They were initially published on Wikimedia by [Cburnett](https://commons.wikimedia.org/wiki/User:Cburnett). See https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces for more information.
+The contents of this repository are licensed under the [MIT License](LICENSE), with the exception of the chess pieces under [`src/assets/`](src/assets/). Those are licensed under the [GNU General Public License, version 2](src/assets/LICENSE). They were initially published on Wikimedia by [Cburnett](https://en.wikipedia.org/wiki/User:Cburnett), and later modified by other contributors.
