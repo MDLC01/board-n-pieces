@@ -79,7 +79,7 @@ def build_readme():
             examples.append('\n'.join(example))
             final_lines.append(line)
             final_lines.append('')
-            final_lines.append(f'![image](examples/example-{len(examples)}.png)')
+            final_lines.append(f'![image](examples/example-{len(examples)}.svg)')
             final_lines.append('')
         elif is_example:
             final_lines.append(line)
@@ -100,7 +100,7 @@ def build_readme():
 
     TARGET_DIR.joinpath(EXAMPLES_DIR).mkdir(parents=True)
     subprocess.run(
-        ['typst', 'compile', '-', str(EXAMPLES_DIR.joinpath('example-{n}.png'))],
+        ['typst', 'compile', '-', str(EXAMPLES_DIR.joinpath('example-{n}.svg'))],
         input='\n'.join(example_source),
         encoding='utf-8',
         cwd=TARGET_DIR,
