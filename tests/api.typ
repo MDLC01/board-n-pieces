@@ -18,9 +18,21 @@
 #bnp.board(bnp.starting-position)
 
 ---
+#set text(dir: rtl)
+#bnp.board(
+  bnp.starting-position,
+)
+
+---
 #bnp.board(
   bnp.starting-position,
   highlighted-squares: ("e4", "d4", "e5", "d5", "f4"),
+)
+
+---
+#bnp.board(
+  bnp.starting-position,
+  highlighted-squares: "e4 d4 e5 d5 f4",
 )
 
 ---
@@ -64,9 +76,3 @@
 
 ---
 #bnp.board(bnp.fen("b2r3r/k3qp1p/pn3np1/Npp5/3pPQ2/P1N2PPB/1PP4P/1K1RR3 w - - 0 22"))
-
----
-#bnp.board(
-  bnp.starting-position,
-  highlighted-squares: "e4 d4 e5 d5 f4",
-)
