@@ -45,7 +45,7 @@ Note that you can also specify only the first part of the FEN string:
 
 The `board` function lets you customize the appearance of the board with multiple arguments. They are described below.
 
-- `highlighted-squares` is a list of squares to highlight (e.g. `("d3", "d2", "e3")`).
+- `highlighted-squares` is a list of squares to highlight (e.g. `("d3", "d2", "e3")`). Can also be specified as a single string containing whitespace-separated squares (e.g. `"d3 d2 e3"`).
 
 - `reverse` is a boolean indicating whether to reverse the board, displaying it from black's point of view. This is `false` by default, meaning the board is displayed from white's point of view.
 

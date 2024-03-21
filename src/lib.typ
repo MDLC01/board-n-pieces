@@ -78,6 +78,8 @@
   /// The position to display.
   position,
   /// A list of squares to highlight.
+  ///
+  /// Can also be a string containing multiple whitespace-separated squares.
   highlighted-squares: (),
 
   /// Whether to reverse the board.
@@ -103,6 +105,10 @@
   pieces: auto,
 ) = {
   import "internals.typ": square-coordinates
+
+  if type(highlighted-squares) == str {
+    highlighted-squares = highlighted-squares.split()
+  }
 
   // Doing this saves time when loading the package.
   if pieces == auto {
