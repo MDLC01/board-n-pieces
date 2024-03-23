@@ -50,7 +50,7 @@
     .map(rank => {
       let squares = ()
       for square in rank {
-        if square in (" ", ".") {
+        if square in (" ", ".", "-") {
           squares.push(none)
         } else {
           squares.push(square)
