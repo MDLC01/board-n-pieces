@@ -74,6 +74,8 @@
 
 
 /// Displays a position on a chess board.
+///
+/// A position can be created using the `position` function.
 #let board(
   /// The position to display.
   position,
