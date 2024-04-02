@@ -46,6 +46,7 @@ Note that you can also specify only the first part of the FEN string:
 The `game` function creates an array of positions from a full chess game. A game is described by a series of turns written using [standard algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). Those turns can be specified as an array of strings, or as a single string containing whitespace-separated moves.
 
 ```example
+%show: pad.with(0.5cm)
 The scholar's mate:
 #let g = game("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
 #grid(

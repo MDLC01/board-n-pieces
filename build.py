@@ -70,33 +70,33 @@ def build_readme():
 
     # Build examples
 
-    examples = []
+    example_source = [
+        '#import "lib.typ": *;',
+        '#set page(width: auto, height: auto, margin: 0cm, fill: white);',
+    ]
+    example_count = 0
     example = []
     is_example = False
     for line in initial_readme.splitlines():
         if is_example and line.startswith('```'):
             is_example = False
-            examples.append('\n'.join(example))
+            example_count += 1
+            example_source.append(f'#page[\n{'\n'.join(example)}\n];')
             final_lines.append(line)
             final_lines.append('')
-            final_lines.append(f'![image](examples/example-{len(examples)}.svg)')
-            final_lines.append('')
+            final_lines.append(f'![image](examples/example-{example_count}.svg)')
         elif is_example:
-            final_lines.append(line)
-            example.append(line)
+            if line.startswith('%'):
+                example.append('#' + line[1:])
+            else:
+                final_lines.append(line)
+                example.append(line)
         elif line.startswith('```example'):
             final_lines.append('```typ')
             is_example = True
             example = []
         else:
             final_lines.append(line)
-
-    example_source = [
-        f'#import "lib.typ": *;',
-        '#set page(width: auto, height: auto, margin: 0cm);',
-    ]
-    for example in examples:
-        example_source.append(f'#page[{example}];')
 
     TARGET_DIR.joinpath(EXAMPLES_DIR).mkdir(parents=True)
     subprocess.run(

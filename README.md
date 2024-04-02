@@ -7,7 +7,7 @@ This is a [Typst](https://github.com/typst/typst) package to display chessboards
 
 This project consists of a Typst library and a plugin written in Rust. Sources for the library are under [`src/`](src/), and sources for the plugin are in [`plugin/`](plugin/).
 
-This project can be built into a proper Typst package by [`build.py`](build.py).
+This project can be built into a proper Typst package by [`build.py`](build.py). The build script works with Python 3.12, and does not require anything outside of the standard library.
 
 The [`tests/`](tests/) directory contains a small test suite.
 
