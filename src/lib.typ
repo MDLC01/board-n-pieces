@@ -71,7 +71,7 @@
 )
 
 
-/// Creates a position from a FEN string.
+/// Creates a position using Forsyth–Edwards Notation.
 ///
 /// For example, this creates the starting position.
 /// ```typ

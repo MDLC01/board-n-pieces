@@ -28,7 +28,7 @@ You can create a different position using the `position` function. It accepts st
 ))
 ```
 
-Alternatively, you can use the `fen` function to create a position from a [FEN](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation) string:
+Alternatively, you can use the `fen` function to create a position using [Forsyth–Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation):
 
 ```example
 #board(fen("r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1 b - - 1 23"))
@@ -41,11 +41,28 @@ Note that you can also specify only the first part of the FEN string:
 ```
 
 
+## Using the `game` function
+
+The `game` function creates an array of positions from a full chess game. A game is described by a series of turns written using [standard algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). Those turns can be specified as an array of strings, or as a single string containing whitespace-separated moves.
+
+```example
+The scholar's mate:
+#let g = game("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
+#grid(
+  columns: (auto, ) * 4,
+  gutter: 0.2cm,
+  ..g.map(board.with(square-size: 0.5cm)),
+)
+```
+
+You can specify an alternative starting position to the `game` function with the `starting-position` named argument.
+
+
 ## Customizing a chessboard
 
 The `board` function lets you customize the appearance of the board with multiple arguments. They are described below.
 
-- `highlighted-squares` is a list of squares to highlight (e.g. `("d3", "d2", "e3")`). Can also be specified as a single string containing whitespace-separated squares (e.g. `"d3 d2 e3"`).
+- `highlighted-squares` is a list of squares to highlight (e.g. `("d3", "d2", "e3")`). It can also be specified as a single string containing whitespace-separated squares (e.g. `"d3 d2 e3"`).
 
 - `reverse` is a boolean indicating whether to reverse the board, displaying it from black's point of view. This is `false` by default, meaning the board is displayed from white's point of view.
 
