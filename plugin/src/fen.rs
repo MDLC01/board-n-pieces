@@ -1,29 +1,47 @@
-use crate::abi;
-use crate::abi::{Abi, ByteAbi};
-use crate::model::{Board, CastlingAvailabilities, Color, Piece, Position, Square, SquareContent};
+use crate::model::{
+    Board, CastlingAvailabilities, Color, File, Piece, PieceKind, Position, Rank, Square,
+    SquareContent,
+};
 use crate::utils::SliceExt;
-use std::iter;
 use std::str::FromStr;
 
-fn parse_board(fen: &[u8]) -> abi::Result<Board> {
-    let mut squares = Vec::new();
-    for fen_rank in fen.split_on(b'/') {
+fn parse_piece(fen: u8) -> crate::Result<Piece> {
+    match fen {
+        b'P' => Ok(Piece::new(Color::White, PieceKind::Pawn)),
+        b'N' => Ok(Piece::new(Color::White, PieceKind::Knight)),
+        b'B' => Ok(Piece::new(Color::White, PieceKind::Bishop)),
+        b'R' => Ok(Piece::new(Color::White, PieceKind::Rook)),
+        b'Q' => Ok(Piece::new(Color::White, PieceKind::Queen)),
+        b'K' => Ok(Piece::new(Color::White, PieceKind::King)),
+        b'p' => Ok(Piece::new(Color::Black, PieceKind::Pawn)),
+        b'n' => Ok(Piece::new(Color::Black, PieceKind::Knight)),
+        b'b' => Ok(Piece::new(Color::Black, PieceKind::Bishop)),
+        b'r' => Ok(Piece::new(Color::Black, PieceKind::Rook)),
+        b'q' => Ok(Piece::new(Color::Black, PieceKind::Queen)),
+        b'k' => Ok(Piece::new(Color::Black, PieceKind::King)),
+        _ => Err("Invalid piece")?,
+    }
+}
+
+fn parse_board(fen: &[u8]) -> crate::Result<Board> {
+    let mut squares = [[SquareContent::Empty; 8]; 8];
+    for (rank_index, fen_rank) in fen.split_on(b'/').enumerate() {
         let fen_rank: &[u8] = fen_rank;
-        let mut rank = Vec::new();
+        let mut file_index = 0;
         for c in fen_rank {
             if let Some(n) = (*c as char).to_digit(10) {
-                rank.extend(iter::repeat(SquareContent::Empty).take(n as usize))
+                file_index += n as usize
             } else {
-                rank.push(SquareContent::Piece(Piece::from_byte(*c)?))
+                squares[rank_index][file_index] = SquareContent::Piece(parse_piece(*c)?);
+                file_index += 1;
             }
         }
-        squares.push(rank)
     }
     squares.reverse();
     Ok(Board::new(squares))
 }
 
-fn parse_castling_availabilities(fen: &[u8]) -> abi::Result<CastlingAvailabilities> {
+fn parse_castling_availabilities(fen: &[u8]) -> crate::Result<CastlingAvailabilities> {
     Ok(CastlingAvailabilities {
         white_king_side: fen.contains(&b'K'),
         white_queen_side: fen.contains(&b'Q'),
@@ -32,14 +50,17 @@ fn parse_castling_availabilities(fen: &[u8]) -> abi::Result<CastlingAvailabiliti
     })
 }
 
-fn parse_en_passant_target_square(fen: &[u8]) -> abi::Result<Option<Square>> {
+fn parse_en_passant_target_square(fen: &[u8]) -> crate::Result<Option<Square>> {
     if fen == b"-" {
         return Ok(None);
     }
-    Ok(Some(Square::from_slice(fen)?))
+    let [f, r] = fen else { Err("Invalid square")? };
+    let file = File::new((*f - b'a') as usize).ok_or("Invalid file")?;
+    let rank = Rank::new((*r - b'1') as usize).ok_or("Invalid rank")?;
+    Ok(Some(Square::new(file, rank)))
 }
 
-fn parse_int(fen: &[u8]) -> abi::Result<u32> {
+fn parse_int(fen: &[u8]) -> crate::Result<u32> {
     u32::from_str(
         std::str::from_utf8(fen)
             .map_err(|_| "Unreachable: FEN was already checked to be valid ASCII.")?,
@@ -47,7 +68,8 @@ fn parse_int(fen: &[u8]) -> abi::Result<u32> {
     .map_err(|err| err.to_string())
 }
 
-pub fn parse_fen(fen: &[u8]) -> abi::Result<Position> {
+/// Parses Forsyth–Edwards Notation (FEN) into a position.
+pub fn parse_fen(fen: &[u8]) -> crate::Result<Position> {
     if !fen.is_ascii() {
         Err("Invalid FEN: expected ASCII")?
     }
@@ -60,7 +82,12 @@ pub fn parse_fen(fen: &[u8]) -> abi::Result<Position> {
         return Ok(Position::default_with_board(board));
     }
 
-    let active = Color::from_slice(parts.next().ok_or("Invalid FEN: missing active player")?)?;
+    let active = match parts.next() {
+        Some(b"w") => Color::White,
+        Some(b"b") => Color::Black,
+        Some(_) => Err("Invalid active player")?,
+        None => Err("Invalid FEN: missing active player")?,
+    };
 
     let castling_availabilities = parse_castling_availabilities(
         parts
@@ -90,4 +117,82 @@ pub fn parse_fen(fen: &[u8]) -> abi::Result<Position> {
         halfmove,
         fullmove,
     })
+}
+
+fn fen_piece(piece: Piece) -> String {
+    let mut s = piece.kind.to_string();
+    match piece.color {
+        Color::White => s.make_ascii_uppercase(),
+        Color::Black => s.make_ascii_lowercase(),
+    }
+    s
+}
+
+fn fen_board(board: Board) -> String {
+    let mut s = String::new();
+    for r in (0..8).rev() {
+        let mut empty_streak = 0;
+        for f in 0..8 {
+            match board[Square::new(File::new(f).unwrap(), Rank::new(r).unwrap())] {
+                SquareContent::Empty => empty_streak += 1,
+                SquareContent::Piece(piece) => {
+                    if empty_streak > 0 {
+                        s.push_str(&empty_streak.to_string());
+                        empty_streak = 0
+                    }
+                    s.push_str(&fen_piece(piece))
+                }
+            }
+        }
+        if empty_streak > 0 {
+            s.push_str(&empty_streak.to_string())
+        }
+        if r != 0 {
+            s.push('/')
+        }
+    }
+    s
+}
+
+fn fen_color(color: Color) -> &'static str {
+    match color {
+        Color::White => "w",
+        Color::Black => "b",
+    }
+}
+
+fn fen_castling_availabilities(castling_availabilities: CastlingAvailabilities) -> String {
+    let mut s = String::new();
+    if castling_availabilities.white_king_side {
+        s.push('K')
+    }
+    if castling_availabilities.white_queen_side {
+        s.push('Q')
+    }
+    if castling_availabilities.black_king_side {
+        s.push('k')
+    }
+    if castling_availabilities.black_queen_side {
+        s.push('q')
+    }
+    if s.is_empty() {
+        s.push('-')
+    }
+    s
+}
+
+/// Converts a position to Forsyth–Edwards Notation (FEN).
+pub fn fen(position: Position) -> String {
+    format!(
+        "{} {} {} {} {} {}",
+        fen_board(position.board),
+        fen_color(position.active),
+        fen_castling_availabilities(position.castling_availabilities),
+        match position.en_passant_target_square {
+            None => "-".to_string(),
+            Some(square) => square.name(),
+        },
+        position.halfmove,
+        position.fullmove,
+    )
 }

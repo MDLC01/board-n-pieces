@@ -4,7 +4,8 @@
 
 /// The starting position of a standard chess game.
 #let starting-position = (
-  type: "boardnpieces:position",
+  type: "board-n-pieces:position",
+  fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   board: (
     ("R", "N", "B", "Q", "K", "B", "N", "R"),
     ("P", ) * 8,
@@ -44,20 +45,29 @@
 /// )
 /// ```
 #let position(..ranks) = (
-  ..starting-position,
-  board: ranks.pos()
-    .rev()
+  type: "board-n-pieces:fen",
+  fen: ranks.pos()
     .map(rank => {
-      let squares = ()
+      let fen-rank = ""
+      let empty-count = 0
       for square in rank {
         if square in (" ", ".", "-") {
-          squares.push(none)
+          empty-count += 1
         } else {
-          squares.push(square)
+          if empty-count != 0 {
+            fen-rank += str(empty-count)
+            empty-count = 0
+          }
+          fen-rank += square
         }
       }
-      squares
-    }),
+      if empty-count != 0 {
+        fen-rank += str(empty-count)
+      }
+      fen-rank
+    })
+    .join("/")
+    + " w KQkq - 0 1",
 )
 
 
@@ -68,8 +78,29 @@
 /// #let starting-position = fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 /// ```
 #let fen(fen-string) = {
-  import "internals.typ": parse-fen
-  parse-fen(fen-string)
+  if " " not in fen-string {
+    fen-string = fen-string + " w KQkq - 0 1"
+  }
+  let fen-parts = fen-string.split(" ")
+  (
+    type: "board-n-pieces:fen",
+    fen: fen-string,
+  )
+}
+
+
+/// Creates an array containing the successive positions of the game with the
+/// given turns.
+///
+/// Turns can be specified as an array of strings using standard algebraic
+/// notation. Alternatively, you can also specify a single string containing
+/// whitespace-separated turns.
+#let game(starting-position: starting-position, turns) = {
+  import "internals.typ": replay-game
+  if type(turns) == str {
+    turns = turns.split()
+  }
+  replay-game(starting-position, turns)
 }
 
 
@@ -106,7 +137,9 @@
   /// How to display each piece.
   pieces: auto,
 ) = {
-  import "internals.typ": square-coordinates
+  import "internals.typ": resolve-position, square-coordinates
+
+  position = resolve-position(position)
 
   if type(highlighted-squares) == str {
     highlighted-squares = highlighted-squares.split()
@@ -129,11 +162,6 @@
       k: image("assets/kb.svg", width: 100%),
     )
   }
-
-  assert(
-    type(position) == dictionary and position.type == "boardnpieces:position",
-    message: "`position` should be a position. You can construct a position with the `position` function.",
-  )
 
   let height = position.board.len()
   assert(height > 0, message: "Board cannot be empty.")
