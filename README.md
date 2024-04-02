@@ -1,6 +1,6 @@
 # Board & Pieces
 
-This is a [Typst](https://github.com/typst/typst) package to display chessboards. It is available on [typst Universe](https://typst.app/universe/package/board-n-pieces).
+This is a [Typst](https://github.com/typst/typst) package to display chessboards. It is available on [Typst Universe](https://typst.app/universe/package/board-n-pieces).
 
 
 ## Project structure
@@ -14,7 +14,7 @@ The [`tests/`](tests/) directory contains a small test suite.
 
 ## Usage
 
-For more information on how to use this package, take a look at [`src/README.md`](src/README.md).
+For more information on how to use this package, take a look at the rendered README on [Typst Universe](https://typst.app/universe/package/board-n-pieces).
 
 
 ## License
