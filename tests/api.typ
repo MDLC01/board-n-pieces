@@ -18,10 +18,12 @@
 #bnp.board(bnp.starting-position)
 
 ---
-#set text(dir: rtl)
-#bnp.board(
-  bnp.starting-position,
-)
+#{
+  set text(dir: rtl)
+  bnp.board(
+    bnp.starting-position,
+  )
+}
 
 ---
 #bnp.board(
