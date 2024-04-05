@@ -1,3 +1,20 @@
+/// Similar to [`FromStr`](std::str::FromStr).
+pub trait FromChar: Sized {
+    type Err;
+
+    fn from_char(c: char) -> Result<Self, Self::Err>;
+}
+
+pub trait CharExt {
+    fn parse<T: FromChar>(self) -> Result<T, T::Err>;
+}
+
+impl CharExt for char {
+    fn parse<T: FromChar>(self) -> Result<T, T::Err> {
+        T::from_char(self)
+    }
+}
+
 pub trait SliceExt<T> {
     fn split_on<'a>(&'a self, value: T) -> impl Iterator<Item = &'a [T]>
     where
@@ -13,6 +30,20 @@ impl<T> SliceExt<T> for [T] {
     }
 }
 
+pub trait StrExt {
+    /// If this string slice is not empty, returns its last character and the corresponding prefix.
+    /// Otherwise, returns `None`.
+    fn split_last_char(&self) -> Option<(&str, char)>;
+}
+
+impl StrExt for str {
+    fn split_last_char(&self) -> Option<(&str, char)> {
+        self.chars()
+            .last()
+            .map(|c| (&self[..self.len() - c.len_utf8()], c))
+    }
+}
+
 pub trait OptionExt<T> {
     #[allow(clippy::wrong_self_convention)]
     fn is_none_or(self, f: impl FnOnce(T) -> bool) -> bool;
@@ -25,6 +56,24 @@ impl<T> OptionExt<T> for Option<T> {
             Some(x) => f(x),
         }
     }
+}
+
+/// A trait for finite types.
+///
+/// Notably, defines the [`values`](Self::values) function that returns all the values of the type.
+pub trait Finite: Sized {
+    /// Returns all the values of this type.
+    fn values() -> impl IntoIterator<Item = Self>;
+
+    /// Returns an iterator over all the values of the type
+    fn iter() -> impl Iterator<Item = Self> {
+        Self::values().into_iter()
+    }
+}
+
+/// A trait for types for which each value has a canonical name.
+pub trait Name {
+    fn name(&self) -> String;
 }
 
 /// Iterates over all pairs of elements of two iterators.

@@ -1,6 +1,7 @@
 use crate::model::{Color, File, Piece, PieceKind, Position, Rank, Square, SquareContent};
-use crate::utils::OptionExt;
+use crate::utils::{CharExt, Finite, Name, OptionExt, StrExt};
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
 use std::{fmt, iter};
 
 #[derive(Debug, Copy, Clone)]
@@ -145,6 +146,10 @@ macro_rules! gen_move {
 /// castling moves.
 /// Squares in the returned move are relative to the active player.
 fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<Move>> {
+    // FIXME: When a turn is disambiguated using the rank of departure, this means it cannot be
+    //  disambiguated using the departure file, which is an additional information that we don't
+    //  currently take into account.
+
     let mut moves = Vec::new();
     for global_square in Square::all() {
         let departure = LocalSquare::new(position.active, global_square);
@@ -390,155 +395,197 @@ impl AlgebraicTurn {
     }
 }
 
-macro_rules! file {
-    () => {
-        b'a'..=b'h'
-    };
-}
-
-macro_rules! rank {
-    () => {
-        b'1'..=b'8'
-    };
-}
-
-macro_rules! capture {
-    () => {
-        b'x' | b':'
-    };
-}
-
-macro_rules! piece {
-    () => {
-        b'P' | b'N' | b'B' | b'R' | b'Q' | b'K'
-    };
-}
-
-pub fn parse_algebraic_turn(source: &[u8]) -> crate::Result<AlgebraicTurn> {
-    // TODO: Support markers for check (+), checkmate (#) and comments (??, !!, ?, !, !?, ?!)
-    // TODO: Maybe this could be rewritten as a sort of RR1 thing by starting from the right.
-
-    let capture = source.iter().any(|c| matches!(c, capture!()));
-
-    match source {
-        // "e4", "xe4" (pawn move + optional capture)
-        [f @ file!(), r @ rank!()] | [capture!(), f @ file!(), r @ rank!()] => {
-            Ok(AlgebraicTurn::Normal {
-                destination_file: (*f as char).to_string().parse()?,
-                destination_rank: (*r as char).to_string().parse()?,
-                piece: PieceKind::Pawn,
-                departure_file: None,
-                departure_rank: None,
-                capture,
-                promotion: None,
-            })
+fn parse_finite<T: Finite + Name>(source: &str) -> (&str, Option<T>) {
+    for x in T::values() {
+        if let Some(prefix) = source.strip_suffix(&x.name()) {
+            return (prefix, Some(x));
         }
-
-        // "exd5" (disambiguated pawn move + capture)
-        [f0 @ file!(), capture!(), f @ file!(), r @ rank!()] => Ok(AlgebraicTurn::Normal {
-            destination_file: (*f as char).to_string().parse()?,
-            destination_rank: (*r as char).to_string().parse()?,
-            piece: PieceKind::Pawn,
-            departure_file: Some((*f0 as char).to_string().parse()?),
-            departure_rank: None,
-            capture,
-            promotion: None,
-        }),
-
-        // "e8Q", "xe8Q" (pawn move + optional capture + promote)
-        [f @ file!(), r @ rank!(), p @ piece!()]
-        | [f @ file!(), r @ rank!(), b'=', p @ piece!()]
-        | [f @ file!(), r @ rank!(), b'/', p @ piece!()]
-        | [f @ file!(), r @ rank!(), b'(', p @ piece!(), b')']
-        | [capture!(), f @ file!(), r @ rank!(), p @ piece!()]
-        | [capture!(), f @ file!(), r @ rank!(), b'=', p @ piece!()]
-        | [capture!(), f @ file!(), r @ rank!(), b'/', p @ piece!()]
-        | [capture!(), f @ file!(), r @ rank!(), b'(', p @ piece!(), b')'] => {
-            Ok(AlgebraicTurn::Normal {
-                destination_file: (*f as char).to_string().parse()?,
-                destination_rank: (*r as char).to_string().parse()?,
-                piece: PieceKind::Pawn,
-                departure_file: None,
-                departure_rank: None,
-                capture,
-                promotion: Some((*p as char).to_string().parse()?),
-            })
-        }
-
-        // "exd5Q" (disambiguated pawn move + capture + promote)
-        [f0 @ file!(), capture!(), f @ file!(), r @ rank!(), p @ piece!()]
-        | [f0 @ file!(), capture!(), f @ file!(), r @ rank!(), b'=', p @ piece!()]
-        | [f0 @ file!(), capture!(), f @ file!(), r @ rank!(), b'/', p @ piece!()]
-        | [f0 @ file!(), capture!(), f @ file!(), r @ rank!(), b'(', p @ piece!(), b')'] => {
-            Ok(AlgebraicTurn::Normal {
-                destination_file: (*f as char).to_string().parse()?,
-                destination_rank: (*r as char).to_string().parse()?,
-                piece: PieceKind::Pawn,
-                departure_file: Some((*f0 as char).to_string().parse()?),
-                departure_rank: None,
-                capture,
-                promotion: Some((*p as char).to_string().parse()?),
-            })
-        }
-
-        // "Be5", "Bxe5" (piece move)
-        [p @ piece!(), f @ file!(), r @ rank!()]
-        | [p @ piece!(), capture!(), f @ file!(), r @ rank!()] => Ok(AlgebraicTurn::Normal {
-            destination_file: (*f as char).to_string().parse()?,
-            destination_rank: (*r as char).to_string().parse()?,
-            piece: (*p as char).to_string().parse()?,
-            departure_file: None,
-            departure_rank: None,
-            capture,
-            promotion: None,
-        }),
-
-        // "Rdf8", "Rdxf8"
-        [p @ piece!(), f0 @ file!(), f @ file!(), r @ rank!()]
-        | [p @ piece!(), f0 @ file!(), capture!(), f @ file!(), r @ rank!()] => {
-            Ok(AlgebraicTurn::Normal {
-                destination_file: (*f as char).to_string().parse()?,
-                destination_rank: (*r as char).to_string().parse()?,
-                piece: (*p as char).to_string().parse()?,
-                departure_file: Some((*f0 as char).to_string().parse()?),
-                departure_rank: None,
-                capture,
-                promotion: None,
-            })
-        }
-
-        // "R1a3", "R1xa3"
-        [p @ piece!(), r0 @ rank!(), f @ file!(), r @ rank!()]
-        | [p @ piece!(), r0 @ rank!(), capture!(), f @ file!(), r @ rank!()] => {
-            Ok(AlgebraicTurn::Normal {
-                destination_file: (*f as char).to_string().parse()?,
-                destination_rank: (*r as char).to_string().parse()?,
-                piece: (*p as char).to_string().parse()?,
-                departure_file: None,
-                departure_rank: Some((*r0 as char).to_string().parse()?),
-                capture,
-                promotion: None,
-            })
-        }
-
-        // "Qh4e1", "Qh4xe1"
-        [p @ piece!(), f0 @ file!(), r0 @ rank!(), f @ file!(), r @ rank!()]
-        | [p @ piece!(), f0 @ file!(), r0 @ rank!(), capture!(), f @ file!(), r @ rank!()] => {
-            Ok(AlgebraicTurn::Normal {
-                destination_file: (*f as char).to_string().parse()?,
-                destination_rank: (*r as char).to_string().parse()?,
-                piece: (*p as char).to_string().parse()?,
-                departure_file: Some((*f0 as char).to_string().parse()?),
-                departure_rank: Some((*r0 as char).to_string().parse()?),
-                capture,
-                promotion: None,
-            })
-        }
-
-        b"0-0" | b"O-O" => Ok(AlgebraicTurn::KingSideCastle),
-
-        b"0-0-0" | b"O-O-O" => Ok(AlgebraicTurn::QueenSideCastle),
-
-        _ => Err("Invalid algebraic notation")?,
     }
+    (source, None)
+}
+
+fn parse_promotion(source: &str) -> crate::Result<(&str, Option<PieceKind>)> {
+    // Parenthesized promotion (e.g., "e8(Q)").
+    if let Some(prefix) = source.strip_suffix(')') {
+        let Some((prefix, c)) = prefix.split_last_char() else {
+            Err(format!("Invalid SAN: {:?}", prefix))?
+        };
+        let Some(prefix) = prefix.strip_suffix('(') else {
+            Err(format!("Invalid SAN: {:?}", prefix))?
+        };
+        let promotion = c.parse()?;
+        return Ok((prefix, Some(promotion)));
+    }
+
+    // Promotion with or without indicating symbol (e.g., "e8=Q", "e8/Q", "e8Q").
+    if let Some((prefix, c)) = source.split_last_char() {
+        if let Ok(promotion) = c.parse() {
+            return if let Some(prefix) = prefix.strip_suffix('=') {
+                Ok((prefix, Some(promotion)))
+            } else if let Some(prefix) = prefix.strip_suffix('/') {
+                Ok((prefix, Some(promotion)))
+            } else {
+                Ok((prefix, Some(promotion)))
+            };
+        }
+    }
+
+    // No promotion.
+    Ok((source, None))
+}
+
+fn parse_capture(source: &str) -> (&str, bool) {
+    match source
+        .strip_suffix('x')
+        .or_else(|| source.strip_suffix(':'))
+        .or_else(|| source.strip_suffix('×'))
+    {
+        None => (source, false),
+        Some(prefix) => (prefix, true),
+    }
+}
+
+fn parse_piece(source: &str) -> (&str, PieceKind) {
+    match source.split_last_char() {
+        Some((prefix, 'N')) => (prefix, PieceKind::Knight),
+        Some((prefix, 'B')) => (prefix, PieceKind::Bishop),
+        Some((prefix, 'R')) => (prefix, PieceKind::Rook),
+        Some((prefix, 'Q')) => (prefix, PieceKind::Queen),
+        Some((prefix, 'K')) => (prefix, PieceKind::King),
+        _ => (source, PieceKind::Pawn),
+    }
+}
+
+impl FromStr for AlgebraicTurn {
+    type Err = String;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        if s == "0-0" || s == "O-O" {
+            return Ok(Self::KingSideCastle);
+        }
+
+        if s == "0-0-0" || s == "O-O-O" {
+            return Ok(Self::QueenSideCastle);
+        }
+
+        // TODO: Support pawn moves containing only file information (minimal algebraic notation).
+
+        // TODO: Support capture indicators at the end.
+
+        let (s, promotion) = parse_promotion(s)?;
+
+        let (s, optional_destination_rank) = parse_finite(s);
+        let destination_rank = optional_destination_rank.ok_or("Invalid SAN")?;
+
+        let (s, optional_destination_file) = parse_finite(s);
+        let destination_file = optional_destination_file.ok_or("Invalid SAN")?;
+
+        let (s, capture) = parse_capture(s);
+
+        let (s, departure_rank) = parse_finite(s);
+
+        let (s, departure_file) = parse_finite(s);
+
+        let (s, piece) = parse_piece(s);
+
+        if !s.is_empty() {
+            Err("Invalid SAN")?
+        }
+
+        Ok(AlgebraicTurn::Normal {
+            destination_file,
+            destination_rank,
+            piece,
+            departure_file,
+            departure_rank,
+            capture,
+            promotion,
+        })
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+enum Mark {
+    Check,
+    Checkmate,
+}
+
+impl Finite for Mark {
+    fn values() -> [Self; 2] {
+        [Self::Check, Self::Checkmate]
+    }
+}
+
+impl Name for Mark {
+    fn name(&self) -> String {
+        match self {
+            Self::Check => "+".into(),
+            Self::Checkmate => "#".into(),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+enum Annotation {
+    Blunder,
+    Mistake,
+    Dubious,
+    Interesting,
+    Good,
+    Brilliant,
+}
+
+impl Finite for Annotation {
+    fn values() -> [Self; 6] {
+        [
+            Self::Blunder,
+            Self::Mistake,
+            Self::Dubious,
+            Self::Interesting,
+            Self::Good,
+            Self::Brilliant,
+        ]
+    }
+}
+
+impl Name for Annotation {
+    fn name(&self) -> String {
+        match self {
+            Self::Blunder => "??".into(),
+            Self::Mistake => "?".into(),
+            Self::Dubious => "?!".into(),
+            Self::Interesting => "!?".into(),
+            Self::Good => "!".into(),
+            Self::Brilliant => "!!".into(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct AnnotatedAlgebraicTurn {
+    turn: AlgebraicTurn,
+    #[allow(unused)]
+    mark: Option<Mark>,
+    #[allow(unused)]
+    annotation: Option<Annotation>,
+}
+
+impl FromStr for AnnotatedAlgebraicTurn {
+    type Err = String;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        let (s, annotation) = parse_finite(s);
+        let (s, mark) = parse_finite(s);
+        let turn = s.parse()?;
+
+        Ok(Self {
+            turn,
+            mark,
+            annotation,
+        })
+    }
+}
+
+pub fn parse_turn(s: &str) -> crate::Result<AlgebraicTurn> {
+    Ok(s.parse::<AnnotatedAlgebraicTurn>()?.turn)
 }

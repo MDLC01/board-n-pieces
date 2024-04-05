@@ -2,7 +2,7 @@ use crate::model::{
     Board, CastlingAvailabilities, Color, File, Piece, PieceKind, Position, Rank, Square,
     SquareContent,
 };
-use crate::utils::SliceExt;
+use crate::utils::{Name, SliceExt};
 use std::str::FromStr;
 
 fn parse_piece(fen: u8) -> crate::Result<Piece> {
