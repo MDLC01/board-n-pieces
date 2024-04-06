@@ -42,10 +42,10 @@ fn parse_board(fen: &str) -> crate::Result<Board> {
 
 fn parse_castling_availabilities(fen: &str) -> crate::Result<CastlingAvailabilities> {
     Ok(CastlingAvailabilities {
-        white_king_side: fen.contains('K'),
-        white_queen_side: fen.contains('Q'),
-        black_king_side: fen.contains('k'),
-        black_queen_side: fen.contains('q'),
+        white_kingside: fen.contains('K'),
+        white_queenside: fen.contains('Q'),
+        black_kingside: fen.contains('k'),
+        black_queenside: fen.contains('q'),
     })
 }
 
@@ -149,16 +149,16 @@ fn fen_color(color: Color) -> &'static str {
 
 fn fen_castling_availabilities(castling_availabilities: CastlingAvailabilities) -> String {
     let mut s = String::new();
-    if castling_availabilities.white_king_side {
+    if castling_availabilities.white_kingside {
         s.push('K')
     }
-    if castling_availabilities.white_queen_side {
+    if castling_availabilities.white_queenside {
         s.push('Q')
     }
-    if castling_availabilities.black_king_side {
+    if castling_availabilities.black_kingside {
         s.push('k')
     }
-    if castling_availabilities.black_queen_side {
+    if castling_availabilities.black_queenside {
         s.push('q')
     }
     if s.is_empty() {

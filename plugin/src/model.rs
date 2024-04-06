@@ -370,10 +370,10 @@ impl SquareContent {
         !self.is_empty()
     }
 
-    pub fn is(self, color: Color, kind: PieceKind) -> bool {
+    pub fn is(self, piece: Piece) -> bool {
         match self {
             Self::Empty => false,
-            Self::Piece(piece) => piece.color == color && piece.kind == kind,
+            Self::Piece(p) => p == piece,
         }
     }
 }
@@ -406,31 +406,38 @@ impl IndexMut<Square> for Board {
 
 #[derive(Debug, Copy, Clone)]
 pub struct CastlingAvailabilities {
-    pub white_king_side: bool,
-    pub white_queen_side: bool,
-    pub black_king_side: bool,
-    pub black_queen_side: bool,
+    pub white_kingside: bool,
+    pub white_queenside: bool,
+    pub black_kingside: bool,
+    pub black_queenside: bool,
 }
 
 impl CastlingAvailabilities {
     pub const ALL: Self = Self {
-        white_king_side: true,
-        white_queen_side: true,
-        black_king_side: true,
-        black_queen_side: true,
+        white_kingside: true,
+        white_queenside: true,
+        black_kingside: true,
+        black_queenside: true,
     };
 
-    pub fn king_side_for(self, color: Color) -> bool {
+    pub const NONE: Self = Self {
+        white_kingside: false,
+        white_queenside: false,
+        black_kingside: false,
+        black_queenside: false,
+    };
+
+    pub fn kingside_for(self, color: Color) -> bool {
         match color {
-            Color::White => self.white_king_side,
-            Color::Black => self.black_king_side,
+            Color::White => self.white_kingside,
+            Color::Black => self.black_kingside,
         }
     }
 
-    pub fn queen_side_for(self, color: Color) -> bool {
+    pub fn queenside_for(self, color: Color) -> bool {
         match color {
-            Color::White => self.white_queen_side,
-            Color::Black => self.black_queen_side,
+            Color::White => self.white_queenside,
+            Color::Black => self.black_queenside,
         }
     }
 }

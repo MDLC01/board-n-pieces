@@ -1,4 +1,6 @@
-use crate::model::{Color, File, Piece, PieceKind, Position, Rank, Square, SquareContent};
+use crate::model::{
+    CastlingAvailabilities, Color, File, Piece, PieceKind, Position, Rank, Square, SquareContent,
+};
 use crate::utils::{CharExt, Finite, Name, OptionExt, StrExt};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -32,16 +34,14 @@ impl EnPassantMetadata {
 }
 
 #[derive(Debug, Copy, Clone)]
-struct Move {
-    from: Square,
-    to: Square,
+struct Move<S = Square> {
+    from: S,
+    to: S,
     en_passant_metadata: EnPassantMetadata,
-}
-
-impl Display for Move {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}{}", self.from, self.to)
-    }
+    /// `true` if, and only if, this move removes the ability to kingside castle.
+    removes_kingside_castling_ability: bool,
+    /// `true` if, and only if, this move removes the ability to queenside castle.
+    removes_queenside_castling_ability: bool,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -52,7 +52,7 @@ struct LocalSquare {
 }
 
 impl LocalSquare {
-    fn new(color: Color, absolute_square: Square) -> Self {
+    fn from_absolute(color: Color, absolute_square: Square) -> Self {
         let local_square = match color {
             Color::White => absolute_square,
             Color::Black => absolute_square.transpose(),
@@ -123,12 +123,7 @@ impl From<LocalSquare> for Square {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-struct LocalMove {
-    from: LocalSquare,
-    to: LocalSquare,
-    en_passant_metadata: EnPassantMetadata,
-}
+type LocalMove = Move<LocalSquare>;
 
 impl LocalMove {
     fn new(from: LocalSquare, to: LocalSquare) -> Self {
@@ -136,6 +131,8 @@ impl LocalMove {
             from,
             to,
             en_passant_metadata: EnPassantMetadata::default(),
+            removes_kingside_castling_ability: false,
+            removes_queenside_castling_ability: false,
         }
     }
 
@@ -152,6 +149,28 @@ impl LocalMove {
             ..self
         }
     }
+
+    fn with_removed_kingside_castling_availability(self) -> Self {
+        Self {
+            removes_kingside_castling_ability: true,
+            ..self
+        }
+    }
+
+    fn with_removed_queenside_castling_availability(self) -> Self {
+        Self {
+            removes_queenside_castling_ability: true,
+            ..self
+        }
+    }
+
+    fn with_removed_castling_availabilities(self) -> Self {
+        Self {
+            removes_kingside_castling_ability: true,
+            removes_queenside_castling_ability: true,
+            ..self
+        }
+    }
 }
 
 impl From<LocalMove> for Move {
@@ -160,24 +179,34 @@ impl From<LocalMove> for Move {
             from: value.from.into(),
             to: value.to.into(),
             en_passant_metadata: value.en_passant_metadata,
+            removes_kingside_castling_ability: value.removes_kingside_castling_ability,
+            removes_queenside_castling_ability: value.removes_queenside_castling_ability,
         }
     }
 }
 
-fn generate_affine_moves(
-    moves: &mut Vec<LocalMove>,
-    position: &Position,
+fn generate_affine_moves<'a>(
+    position: &'a Position,
     departure: LocalSquare,
-    mut next: impl FnMut(LocalSquare) -> Option<LocalSquare>,
-) {
-    let mut destination = departure;
-    while let Some(s) = next(destination) {
-        destination = s;
-        moves.push(LocalMove::new(departure, destination));
-        if position.at(destination.into()).is_occupied() {
-            break;
-        }
-    }
+    mut next: impl FnMut(LocalSquare) -> Option<LocalSquare> + 'a,
+) -> impl Iterator<Item = LocalMove> + 'a {
+    let mut state = Some(departure);
+    iter::from_fn(move || {
+        state.and_then(|square| match next(square) {
+            None => {
+                state = None;
+                None
+            }
+            Some(destination) => {
+                state = if position.at(destination.into()).is_occupied() {
+                    None
+                } else {
+                    Some(destination)
+                };
+                Some(LocalMove::new(departure, destination))
+            }
+        })
+    })
 }
 
 macro_rules! generate_composite_move {
@@ -197,10 +226,10 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
 
     let mut moves = Vec::new();
     for global_square in Square::all() {
-        let departure = LocalSquare::new(position.active, global_square);
+        let departure = LocalSquare::from_absolute(position.active, global_square);
         if !position
             .at(departure.into())
-            .is(position.active, piece_kind)
+            .is(Piece::new(position.active, piece_kind))
         {
             continue;
         }
@@ -261,30 +290,46 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
                 generate_composite_move!(moves, departure, [right, right, backward]);
             }
 
-            PieceKind::Bishop => {
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::forward_left);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::forward_right);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::backward_left);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::backward_right);
-            }
+            #[rustfmt::skip]
+            PieceKind::Bishop => moves.extend(
+                iter::empty()
+                    .chain(generate_affine_moves(position, departure, LocalSquare::forward_left))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::forward_right))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::backward_left))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::backward_right)),
+            ),
 
-            PieceKind::Rook => {
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::forward);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::backward);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::left);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::right);
-            }
+            #[rustfmt::skip]
+            PieceKind::Rook => moves.extend(
+                iter::empty()
+                    .chain(generate_affine_moves(position, departure, LocalSquare::forward))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::backward))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::left))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::right))
+                    .map(|m| {
+                        let departure_file = Square::from(m.from).file();
+                        if departure_file == File::H {
+                            m.with_removed_kingside_castling_availability()
+                        } else if departure_file == File::A {
+                            m.with_removed_queenside_castling_availability()
+                        } else {
+                            m
+                        }
+                    }),
+            ),
 
-            PieceKind::Queen => {
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::forward);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::backward);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::left);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::right);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::forward_left);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::forward_right);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::backward_left);
-                generate_affine_moves(&mut moves, position, departure, LocalSquare::backward_right);
-            }
+            #[rustfmt::skip]
+            PieceKind::Queen => moves.extend(
+                iter::empty()
+                    .chain(generate_affine_moves(position, departure, LocalSquare::forward))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::backward))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::left))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::right))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::forward_left))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::forward_right))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::backward_left))
+                    .chain(generate_affine_moves(position, departure, LocalSquare::backward_right)),
+            ),
 
             PieceKind::King => moves.extend(
                 iter::empty()
@@ -296,12 +341,21 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
                     .chain(departure.forward_right())
                     .chain(departure.backward_left())
                     .chain(departure.backward_right())
-                    .map(|destination| LocalMove::new(departure, destination)),
+                    .map(|destination| {
+                        LocalMove::new(departure, destination)
+                            .with_removed_castling_availabilities()
+                    }),
             ),
         }
     }
 
     Ok(moves.into_iter().map(|m| m.into()).collect())
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum Side {
+    King,
+    Queen,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -315,8 +369,7 @@ pub enum AlgebraicTurn {
         capture: bool,
         promotion: Option<PieceKind>,
     },
-    KingSideCastle,
-    QueenSideCastle,
+    Castle(Side),
 }
 
 impl AlgebraicTurn {
@@ -327,6 +380,13 @@ impl AlgebraicTurn {
             if turn_index % 2 == 0 { "." } else { "..." },
             self
         );
+
+        let fullmove = if position.active == Color::Black {
+            position.fullmove + 1
+        } else {
+            position.fullmove
+        };
+
         match self {
             Self::Normal {
                 destination_file,
@@ -354,59 +414,104 @@ impl AlgebraicTurn {
                     Err(format!("ambiguous move: {turn_string}"))?
                 }
 
-                // TODO: Update flags such as castling availabilities.
                 let mut new_board = position.board.clone();
                 new_board[turn.from] = SquareContent::Empty;
-                new_board[turn.to] =
-                    SquareContent::Piece(Piece::new(position.active, promotion.unwrap_or(piece)));
+                let final_piece = Piece::new(position.active, promotion.unwrap_or(piece));
+                new_board[turn.to] = SquareContent::Piece(final_piece);
                 if let Some(capture) = turn.en_passant_metadata.en_passant_capture_square() {
                     new_board[capture] = SquareContent::Empty
                 }
 
+                let mut castling_availabilities = position.castling_availabilities;
+                if turn.removes_kingside_castling_ability {
+                    if position.active == Color::White {
+                        castling_availabilities.white_kingside = false
+                    } else {
+                        castling_availabilities.black_kingside = false
+                    }
+                }
+                if turn.removes_queenside_castling_ability {
+                    if position.active == Color::White {
+                        castling_availabilities.white_queenside = false
+                    } else {
+                        castling_availabilities.black_queenside = false
+                    }
+                }
+
+                let halfmove = if capture || piece == PieceKind::Pawn {
+                    0
+                } else {
+                    position.halfmove + 1
+                };
+
                 Ok(Position {
                     board: new_board,
-
                     active: position.active.other(),
-
-                    // TODO: Update that properly.
-                    castling_availabilities: position.castling_availabilities,
-
+                    castling_availabilities,
                     en_passant_target_square: turn.en_passant_metadata.skipped_square(),
-
-                    halfmove: if capture || piece == PieceKind::Pawn {
-                        0
-                    } else {
-                        position.halfmove
-                    },
-
-                    fullmove: if position.active == Color::Black {
-                        position.fullmove + 1
-                    } else {
-                        position.fullmove
-                    },
+                    halfmove,
+                    fullmove,
                 })
             }
 
-            Self::KingSideCastle => {
-                if !position
-                    .castling_availabilities
-                    .king_side_for(position.active)
-                {
-                    Err("not allowed to castle king-side")?
-                }
-                // TODO
-                Err("castling moves not implemented yet")?
-            }
+            Self::Castle(side) => {
+                let rank = if position.active == Color::White {
+                    Rank::One
+                } else {
+                    Rank::Eight
+                };
+                let king = Piece::new(position.active, PieceKind::King);
+                let rook = Piece::new(position.active, PieceKind::Rook);
 
-            Self::QueenSideCastle => {
-                if !position
-                    .castling_availabilities
-                    .queen_side_for(position.active)
-                {
-                    Err("not able to castle king-side")?
+                let requirements = match side {
+                    Side::King => {
+                        position
+                            .castling_availabilities
+                            .kingside_for(position.active)
+                            && position.at(Square::new(File::E, rank)).is(king)
+                            && position.at(Square::new(File::F, rank)).is_empty()
+                            && position.at(Square::new(File::G, rank)).is_empty()
+                            && position.at(Square::new(File::H, rank)).is(rook)
+                    }
+                    Side::Queen => {
+                        position
+                            .castling_availabilities
+                            .queenside_for(position.active)
+                            && position.at(Square::new(File::A, rank)).is(rook)
+                            && position.at(Square::new(File::B, rank)).is_empty()
+                            && position.at(Square::new(File::C, rank)).is_empty()
+                            && position.at(Square::new(File::D, rank)).is_empty()
+                            && position.at(Square::new(File::E, rank)).is(king)
+                    }
+                };
+                if !requirements {
+                    Err(format!("illegal move: {turn_string}"))?
                 }
-                // TODO
-                Err("castling moves not implemented yet")?
+
+                let mut new_board = position.board.clone();
+                match side {
+                    Side::King => {
+                        new_board[Square::new(File::E, rank)] = SquareContent::Empty;
+                        new_board[Square::new(File::F, rank)] = SquareContent::Piece(rook);
+                        new_board[Square::new(File::G, rank)] = SquareContent::Piece(king);
+                        new_board[Square::new(File::H, rank)] = SquareContent::Empty;
+                    }
+                    Side::Queen => {
+                        new_board[Square::new(File::A, rank)] = SquareContent::Empty;
+                        new_board[Square::new(File::C, rank)] = SquareContent::Piece(king);
+                        new_board[Square::new(File::D, rank)] = SquareContent::Piece(rook);
+                        new_board[Square::new(File::E, rank)] = SquareContent::Empty;
+                    }
+                }
+
+                Ok(Position {
+                    board: new_board,
+                    active: position.active.other(),
+                    castling_availabilities: CastlingAvailabilities::NONE,
+                    en_passant_target_square: None,
+                    halfmove: position.fullmove + 1,
+                    fullmove,
+                })
             }
         }
     }
@@ -446,8 +551,8 @@ impl Display for AlgebraicTurn {
                 };
                 write!(f, "{piece_text}{departure_file_text}{departure_rank_text}{capture_text}{destination_file}{destination_rank}{promote_text}")
             }
-            Self::KingSideCastle => write!(f, "0-0"),
-            Self::QueenSideCastle => write!(f, "0-0-0"),
+            Self::Castle(Side::King) => write!(f, "0-0"),
+            Self::Castle(Side::Queen) => write!(f, "0-0-0"),
         }
     }
 }
@@ -518,11 +623,11 @@ impl FromStr for AlgebraicTurn {
 
     fn from_str(source: &str) -> crate::Result<Self> {
         if source == "0-0" || source == "O-O" {
-            return Ok(Self::KingSideCastle);
+            return Ok(Self::Castle(Side::King));
         }
 
         if source == "0-0-0" || source == "O-O-O" {
-            return Ok(Self::QueenSideCastle);
+            return Ok(Self::Castle(Side::Queen));
         }
 
         // TODO: Support pawn moves containing only file information (minimal algebraic notation).
