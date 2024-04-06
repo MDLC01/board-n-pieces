@@ -1,6 +1,6 @@
 mod fen;
-mod san;
 mod model;
+mod san;
 mod utils;
 
 use crate::fen::{fen, parse_fen};
@@ -20,7 +20,7 @@ pub fn replay_game(starting_position: &[u8], turns: &[u8]) -> Result<Vec<u8>> {
     positions.push(parse_fen(starting_position)?);
     for (i, turn) in turns.enumerate() {
         let Ok(turn) = std::str::from_utf8(turn) else {
-            Err("Internal error: each turn should be a valid UTF-8 string")?
+            Err("internal error: each turn should be a valid UTF-8 string")?
         };
         positions.push(parse_turn(turn)?.apply(i, positions.last().unwrap())?);
     }

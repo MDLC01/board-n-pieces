@@ -314,6 +314,12 @@ pub enum AlgebraicTurn {
 
 impl AlgebraicTurn {
     pub fn apply(self, turn_index: usize, position: &Position) -> crate::Result<Position> {
+        let turn_string = format!(
+            "{}{} {}",
+            turn_index / 2 + 1,
+            if turn_index % 2 == 0 { "." } else { "..." },
+            self
+        );
         match self {
             Self::Normal {
                 destination_file,
@@ -332,10 +338,10 @@ impl AlgebraicTurn {
                         && departure_rank.is_none_or(|rank| m.from.rank() == rank)
                 });
                 let Some(turn) = possible_moves.next() else {
-                    Err(format!("Turn #{} is impossible.", turn_index + 1))?
+                    Err(format!("illegal move: {turn_string}"))?
                 };
                 if possible_moves.next().is_some() {
-                    Err("Ambiguous move.")?
+                    Err(format!("ambiguous move: {turn_string}"))?
                 }
 
                 // TODO: Update flags such as castling availabilities.
@@ -375,10 +381,10 @@ impl AlgebraicTurn {
                     .castling_availabilities
                     .king_side_for(position.active)
                 {
-                    Err("Not allowed to castle king-side.")?
+                    Err("not allowed to castle king-side")?
                 }
                 // TODO
-                Err("Castling moves not implemented yet.")?
+                Err("castling moves not implemented yet")?
             }
 
             Self::QueenSideCastle => {
@@ -386,11 +392,51 @@ impl AlgebraicTurn {
                     .castling_availabilities
                     .queen_side_for(position.active)
                 {
-                    Err("Not able to castle king-side.")?
+                    Err("not able to castle king-side")?
                 }
                 // TODO
-                Err("Castling moves not implemented yet.")?
+                Err("castling moves not implemented yet")?
             }
+        }
+    }
+}
+
+impl Display for AlgebraicTurn {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::Normal {
+                destination_file,
+                destination_rank,
+                piece,
+                departure_file,
+                departure_rank,
+                capture,
+                promotion,
+            } => {
+                let piece_text = match piece {
+                    PieceKind::Pawn => "".into(),
+                    piece => piece.to_string(),
+                };
+                let capture_text = match capture {
+                    true => "x",
+                    false => "",
+                };
+                let departure_file_text = match departure_file {
+                    None => "".into(),
+                    Some(file) => file.name(),
+                };
+                let departure_rank_text = match departure_rank {
+                    None => "".into(),
+                    Some(rank) => rank.name(),
+                };
+                let promote_text = match promotion {
+                    None => "".into(),
+                    Some(piece) => format!("={piece}"),
+                };
+                write!(f, "{piece_text}{departure_file_text}{departure_rank_text}{capture_text}{destination_file}{destination_rank}{promote_text}")
+            }
+            Self::KingSideCastle => write!(f, "0-0"),
+            Self::QueenSideCastle => write!(f, "0-0-0"),
         }
     }
 }
@@ -408,10 +454,10 @@ fn parse_promotion(source: &str) -> crate::Result<(&str, Option<PieceKind>)> {
     // Parenthesized promotion (e.g., "e8(Q)").
     if let Some(prefix) = source.strip_suffix(')') {
         let Some((prefix, c)) = prefix.split_last_char() else {
-            Err(format!("Invalid SAN: {:?}", prefix))?
+            Err(format!("invalid SAN: {:?}", source))?
         };
         let Some(prefix) = prefix.strip_suffix('(') else {
-            Err(format!("Invalid SAN: {:?}", prefix))?
+            Err(format!("invalid SAN: {:?}", source))?
         };
         let promotion = c.parse()?;
         return Ok((prefix, Some(promotion)));
@@ -459,12 +505,12 @@ fn parse_piece(source: &str) -> (&str, PieceKind) {
 impl FromStr for AlgebraicTurn {
     type Err = String;
 
-    fn from_str(s: &str) -> crate::Result<Self> {
-        if s == "0-0" || s == "O-O" {
+    fn from_str(source: &str) -> crate::Result<Self> {
+        if source == "0-0" || source == "O-O" {
             return Ok(Self::KingSideCastle);
         }
 
-        if s == "0-0-0" || s == "O-O-O" {
+        if source == "0-0-0" || source == "O-O-O" {
             return Ok(Self::QueenSideCastle);
         }
 
@@ -472,13 +518,13 @@ impl FromStr for AlgebraicTurn {
 
         // TODO: Support capture indicators at the end.
 
-        let (s, promotion) = parse_promotion(s)?;
+        let (s, promotion) = parse_promotion(source)?;
 
         let (s, optional_destination_rank) = parse_finite(s);
-        let destination_rank = optional_destination_rank.ok_or("Invalid SAN")?;
+        let destination_rank = optional_destination_rank.ok_or(format!("invalid SAN: {source}"))?;
 
         let (s, optional_destination_file) = parse_finite(s);
-        let destination_file = optional_destination_file.ok_or("Invalid SAN")?;
+        let destination_file = optional_destination_file.ok_or(format!("invalid SAN: {source}"))?;
 
         let (s, capture) = parse_capture(s);
 
@@ -489,7 +535,7 @@ impl FromStr for AlgebraicTurn {
         let (s, piece) = parse_piece(s);
 
         if !s.is_empty() {
-            Err("Invalid SAN")?
+            Err(format!("invalid SAN: {source}"))?
         }
 
         Ok(AlgebraicTurn::Normal {

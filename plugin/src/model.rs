@@ -101,7 +101,7 @@ impl FromChar for File {
             'f' => Ok(Self::F),
             'g' => Ok(Self::G),
             'h' => Ok(Self::H),
-            _ => Err("Invalid file")?,
+            c => Err(format!("invalid file: {c}"))?,
         }
     }
 }
@@ -209,7 +209,7 @@ impl FromChar for Rank {
             '6' => Ok(Self::Six),
             '7' => Ok(Self::Seven),
             '8' => Ok(Self::Eight),
-            _ => Err("Invalid file")?,
+            c => Err(format!("invalid rank: {c}"))?,
         }
     }
 }
@@ -270,7 +270,7 @@ impl FromStr for Square {
 
     fn from_str(s: &str) -> crate::Result<Self> {
         let [f, r] = s.chars().collect::<Vec<_>>()[..] else {
-            Err("Invalid square")?
+            Err(format!("invalid square: {s}"))?
         };
         Ok(Self::new(f.parse()?, r.parse()?))
     }
@@ -325,7 +325,7 @@ impl FromChar for PieceKind {
             'R' => Ok(Self::Rook),
             'Q' => Ok(Self::Queen),
             'K' => Ok(Self::King),
-            _ => Err(format!("Invalid piece kind: {:?}", c))?,
+            c => Err(format!("invalid piece kind: {}", c))?,
         }
     }
 }
