@@ -366,6 +366,10 @@ impl SquareContent {
         matches!(self, Self::Empty)
     }
 
+    pub fn is_occupied(self) -> bool {
+        !self.is_empty()
+    }
+
     pub fn is(self, color: Color, kind: PieceKind) -> bool {
         match self {
             Self::Empty => false,

@@ -126,16 +126,16 @@ fn generate_affine_moves(
     while let Some(s) = next(destination) {
         destination = s;
         moves.push(LocalMove::new(departure, destination));
-        if !position.at(destination.into()).is_empty() {
+        if position.at(destination.into()).is_occupied() {
             break;
         }
     }
 }
 
-macro_rules! gen_move {
-    ($moves:ident, $departure:ident, [$( $step:expr ), *]) => {
+macro_rules! generate_composite_move {
+    ($moves:ident, $departure:ident, [$( $step:ident ), *]) => {
         if let Some(destination) = Some($departure)
-            $( .and_then($step) )*
+            $( .and_then(LocalSquare::$step) )*
         {
             $moves.push(LocalMove::new($departure, destination))
         }
@@ -156,6 +156,7 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
         {
             continue;
         }
+
         match piece_kind {
             PieceKind::Pawn => {
                 // Forward pawn move.
@@ -189,66 +190,14 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
             }
 
             PieceKind::Knight => {
-                gen_move!(
-                    moves,
-                    departure,
-                    [
-                        LocalSquare::forward,
-                        LocalSquare::forward,
-                        LocalSquare::left
-                    ]
-                );
-                gen_move!(
-                    moves,
-                    departure,
-                    [
-                        LocalSquare::forward,
-                        LocalSquare::forward,
-                        LocalSquare::right
-                    ]
-                );
-                gen_move!(
-                    moves,
-                    departure,
-                    [
-                        LocalSquare::backward,
-                        LocalSquare::backward,
-                        LocalSquare::left
-                    ]
-                );
-                gen_move!(
-                    moves,
-                    departure,
-                    [
-                        LocalSquare::backward,
-                        LocalSquare::backward,
-                        LocalSquare::right
-                    ]
-                );
-                gen_move!(
-                    moves,
-                    departure,
-                    [LocalSquare::left, LocalSquare::left, LocalSquare::forward]
-                );
-                gen_move!(
-                    moves,
-                    departure,
-                    [LocalSquare::right, LocalSquare::right, LocalSquare::forward]
-                );
-                gen_move!(
-                    moves,
-                    departure,
-                    [LocalSquare::left, LocalSquare::left, LocalSquare::backward]
-                );
-                gen_move!(
-                    moves,
-                    departure,
-                    [
-                        LocalSquare::right,
-                        LocalSquare::right,
-                        LocalSquare::backward
-                    ]
-                );
+                generate_composite_move!(moves, departure, [forward, forward, left]);
+                generate_composite_move!(moves, departure, [forward, forward, right]);
+                generate_composite_move!(moves, departure, [backward, backward, left]);
+                generate_composite_move!(moves, departure, [backward, backward, right]);
+                generate_composite_move!(moves, departure, [left, left, forward]);
+                generate_composite_move!(moves, departure, [right, right, forward]);
+                generate_composite_move!(moves, departure, [left, left, backward]);
+                generate_composite_move!(moves, departure, [right, right, backward]);
             }
 
             PieceKind::Bishop => {
@@ -290,6 +239,7 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
             ),
         }
     }
+
     Ok(moves.into_iter().map(|m| m.into()).collect())
 }
 
