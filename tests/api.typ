@@ -86,3 +86,10 @@
 #bnp.board(g.first())
 #bnp.board(g.at(17))
 #bnp.board(g.last())
+
+---
+// Test en-passant & castling.
+// Gunnar Gundersen vs. A H Fau, 1928 (from https://www.chess.com/blog/rat_4/the-elusive-en-passant-checkmate)
+#let g = bnp.game("e4 e6 d4 d5 e5 c5 c3 cxd4 cxd4 Bb4+ Nc3 Nc6 Nf3 Nge7 Bd3 O-O Bxh7+ Kxh7 Ng5+ Kg6 h4 Nxd4 Qg4 f5 h5+ Kh6 Nxe6+ g5 hxg6#")
+
+#bnp.board(g.last())
