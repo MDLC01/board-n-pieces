@@ -178,39 +178,42 @@
         })
       })
       .rev()
-      .flatten()
   )
+
+  let grid-elements = squares.flatten()
 
   if display-numbers {
     let number-cell = grid.cell.with(
       inset: 0.3em,
     )
 
-    let column-numbers = (none, ) + (
-      range(1, width + 1)
+    let column-numbers = (
+      none,
+      ..range(1, width + 1)
         .map(file-numbering)
-        .map(number-cell)
-    ) + (none, )
-    squares = (
-      column-numbers
-        + squares
-          .chunks(width)
-          .enumerate()
-          .map(((i, rank)) => {
-            let n = rank-numbering(height - i)
-            (
-              number-cell(n),
-              ..rank,
-              number-cell(n),
-            )
-          })
-          .flatten()
-        + column-numbers
+        .map(number-cell),
+      none,
+    )
+    grid-elements = (
+      ..column-numbers,
+      ..grid-elements
+        .chunks(width)
+        .enumerate()
+        .map(((i, rank)) => {
+          let n = rank-numbering(height - i)
+          (
+            number-cell(n),
+            ..rank,
+            number-cell(n),
+          )
+        })
+        .flatten(),
+      ..column-numbers,
     )
   }
 
   if reverse {
-    squares = squares.rev()
+    grid-elements = grid-elements.rev()
   }
 
   highlighted-squares = highlighted-squares.map(s => {
@@ -262,6 +265,6 @@
 
     align: center + horizon,
 
-    ..squares,
+    ..grid-elements,
   )
 }
