@@ -4,10 +4,38 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use std::{fmt, iter};
 
+#[derive(Debug, Default, Copy, Clone)]
+enum EnPassantMetadata {
+    #[default]
+    /// Nothing relevant to report.
+    Nothing,
+    /// In case of a two-square pawn move, this is the square that was skipped.
+    SkippedSquare(Square),
+    /// In case of an en passant capture, this is the square that was captures.
+    EnPassantCaptureSquare(Square),
+}
+
+impl EnPassantMetadata {
+    fn skipped_square(self) -> Option<Square> {
+        match self {
+            Self::SkippedSquare(square) => Some(square),
+            _ => None,
+        }
+    }
+
+    fn en_passant_capture_square(self) -> Option<Square> {
+        match self {
+            Self::EnPassantCaptureSquare(square) => Some(square),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Copy, Clone)]
 struct Move {
     from: Square,
     to: Square,
+    en_passant_metadata: EnPassantMetadata,
 }
 
 impl Display for Move {
@@ -99,11 +127,30 @@ impl From<LocalSquare> for Square {
 struct LocalMove {
     from: LocalSquare,
     to: LocalSquare,
+    en_passant_metadata: EnPassantMetadata,
 }
 
 impl LocalMove {
     fn new(from: LocalSquare, to: LocalSquare) -> Self {
-        Self { from, to }
+        Self {
+            from,
+            to,
+            en_passant_metadata: EnPassantMetadata::default(),
+        }
+    }
+
+    fn with_skipped_square(self, square: LocalSquare) -> Self {
+        Self {
+            en_passant_metadata: EnPassantMetadata::SkippedSquare(square.into()),
+            ..self
+        }
+    }
+
+    fn with_en_passant_capture(self, square: LocalSquare) -> Self {
+        Self {
+            en_passant_metadata: EnPassantMetadata::EnPassantCaptureSquare(square.into()),
+            ..self
+        }
     }
 }
 
@@ -112,6 +159,7 @@ impl From<LocalMove> for Move {
         Self {
             from: value.from.into(),
             to: value.to.into(),
+            en_passant_metadata: value.en_passant_metadata,
         }
     }
 }
@@ -166,25 +214,38 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
                     }
                 }
 
-                // Initial double pawn move.
-                if let Some(destination) = departure.forward().and_then(LocalSquare::forward) {
-                    if position.at(destination.into()).is_empty() {
-                        moves.push(LocalMove::new(departure, destination));
+                // Initial two-square pawn move.
+                if let Some(skipped) = departure.forward() {
+                    if let Some(destination) = skipped.forward() {
+                        if departure.local_rank == Rank::Two
+                            && position.at(skipped.into()).is_empty()
+                            && position.at(destination.into()).is_empty()
+                        {
+                            moves.push(
+                                LocalMove::new(departure, destination).with_skipped_square(skipped),
+                            )
+                        }
                     }
                 }
 
-                // Pawn capture.
+                // Capture with pawn.
                 for destination in departure
                     .forward_left()
                     .into_iter()
                     .chain(departure.forward_right())
                 {
-                    if !position.at(destination.into()).is_empty()
-                        || position
-                            .en_passant_target_square
-                            .is_some_and(|t| t == destination.into())
-                    {
-                        moves.push(LocalMove::new(departure, destination));
+                    if position.at(destination.into()).is_occupied() {
+                        moves.push(LocalMove::new(departure, destination))
+                    }
+
+                    if position.en_passant_target_square == Some(destination.into()) {
+                        let square = destination.backward().ok_or(format!(
+                            "internal error: unexpected en passant target square in {}",
+                            Square::from(destination),
+                        ))?;
+                        moves.push(
+                            LocalMove::new(departure, destination).with_en_passant_capture(square),
+                        )
                     }
                 }
             }
@@ -294,11 +355,13 @@ impl AlgebraicTurn {
                 }
 
                 // TODO: Update flags such as castling availabilities.
-                // TODO: Support en passant.
                 let mut new_board = position.board.clone();
                 new_board[turn.from] = SquareContent::Empty;
                 new_board[turn.to] =
                     SquareContent::Piece(Piece::new(position.active, promotion.unwrap_or(piece)));
+                if let Some(capture) = turn.en_passant_metadata.en_passant_capture_square() {
+                    new_board[capture] = SquareContent::Empty
+                }
 
                 Ok(Position {
                     board: new_board,
@@ -308,8 +371,7 @@ impl AlgebraicTurn {
                     // TODO: Update that properly.
                     castling_availabilities: position.castling_availabilities,
 
-                    // TODO: Update that properly.
-                    en_passant_target_square: position.en_passant_target_square,
+                    en_passant_target_square: turn.en_passant_metadata.skipped_square(),
 
                     halfmove: if capture || piece == PieceKind::Pawn {
                         0
