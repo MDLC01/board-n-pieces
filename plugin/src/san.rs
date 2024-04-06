@@ -144,11 +144,8 @@ macro_rules! gen_move {
 
 /// Returns all valid moves pieces of a specific kind can make in a specific position, not including
 /// castling moves.
-/// Squares in the returned move are relative to the active player.
 fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<Move>> {
-    // FIXME: When a turn is disambiguated using the rank of departure, this means it cannot be
-    //  disambiguated using the departure file, which is an additional information that we don't
-    //  currently take into account.
+    // FIXME: We should not include moves that put the king in a check position.
 
     let mut moves = Vec::new();
     for global_square in Square::all() {
@@ -280,7 +277,6 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
             }
 
             PieceKind::King => moves.extend(
-                // FIXME: This should not include moves that put the king in a check position.
                 iter::empty()
                     .chain(departure.forward())
                     .chain(departure.backward())
@@ -331,6 +327,9 @@ impl AlgebraicTurn {
                 promotion,
             } => {
                 let valid_moves = valid_moves(position, piece)?;
+                // FIXME: When a turn is disambiguated using the rank of departure, this means it cannot be
+                //  disambiguated using the departure file, which is an additional information that we don't
+                //  currently take into account.
                 let mut possible_moves = valid_moves.clone().into_iter().filter(|m| {
                     m.to.file() == destination_file
                         && m.to.rank() == destination_rank
@@ -515,6 +514,8 @@ impl FromStr for AlgebraicTurn {
         }
 
         // TODO: Support pawn moves containing only file information (minimal algebraic notation).
+
+        // TODO: Support "e.p." suffix.
 
         // TODO: Support capture indicators at the end.
 
