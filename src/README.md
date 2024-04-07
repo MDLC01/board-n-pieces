@@ -1,3 +1,7 @@
+> [!NOTE]
+> This file is used to generate [the Typst Universe page](https://typst.app/universe/package/board-n-pieces). It is processed by [`/build.py`](/build.py).
+
+
 # Board & Pieces
 
 Display chessboards in Typst.

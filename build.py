@@ -77,7 +77,14 @@ def build_readme():
     example_count = 0
     example = []
     is_example = False
+    is_start = True
     for line in initial_readme.splitlines():
+        # Skip initial note.
+        if is_start:
+            if line.startswith('>') or line.strip() == '':
+                continue
+            is_start = False
+        # Handle examples.
         if is_example and line.startswith('```'):
             is_example = False
             example_count += 1
