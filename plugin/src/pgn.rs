@@ -1,4 +1,8 @@
+use crate::fen::parse_fen;
+use crate::model::Position;
 use crate::san::AnnotatedAlgebraicTurn;
+use std::collections::HashMap;
+use std::str::FromStr;
 
 /// A type that can be used to parse Portable Game Notation (PGN).
 ///
@@ -163,10 +167,10 @@ impl<'a> PgnParser<'a> {
         }
     }
 
-    /// Reads a string token.
+    /// Parses a string token.
     ///
-    /// If no string token can be read, `None` is returned. If a string is read, a slice containing
-    /// the entire string token (including quotes) is returned, wrapped in `Some`s.
+    /// If no string token can be parsed, the `Err` variant is returned. If a string is parsed, its
+    /// value is returned, wrapped in `Ok`.
     ///
     /// # Definition
     ///
@@ -185,51 +189,69 @@ impl<'a> PgnParser<'a> {
     /// The length limit is not enforced by this parser.
     ///
     /// [the specification]: https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt
-    fn read_string(&mut self) -> Option<&str> {
+    fn parse_string(&mut self) -> crate::Result<String> {
         if !self.content.starts_with('"') {
-            return None;
+            return Err("invalid PGN: string token should start with a double quote")?;
         }
+        let mut value = String::new();
         let mut escaped = false;
         for (i, c) in self.content.char_indices().skip(1) {
             if c.is_ascii_control() {
-                return None;
+                return Err(
+                    "invalid PGN: ASCII control characters are not allowed in string tokens",
+                )?;
             }
             if escaped {
+                match c {
+                    '"' | '\\' => value.push(c),
+                    _ => Err(format!(
+                        "invalid PGN: illegal escape sequence in string token: \"\\{}\"",
+                        c
+                    ))?,
+                }
                 escaped = false
             } else if c == '\\' {
                 escaped = true
             } else if c == '"' {
                 let end = i + '"'.len_utf8();
-                let (token, remainder) = self.content.split_at(end);
-                self.content = remainder;
-                return Some(token);
+                self.content = &self.content[end..];
+                return Ok(value);
+            } else {
+                value.push(c)
             }
         }
-        None
+        Err("invalid PGN: unclosed string token")?
     }
 
-    /// Skips the tag pair section of a game.
+    /// Parses the tag pair section of a game.
+    ///
+    /// Returns a `HashMap` containing each `(tag_name, tag_value)` pair.
     ///
     /// # Definition
     ///
     /// [The specification] defines the tag pair section in section 8.1.
     ///
     /// [the specification]: https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt
-    fn skip_tag_pair_section(&mut self) -> crate::Result<()> {
-        loop {
+    fn parse_tag_pair_section(&mut self) -> crate::Result<HashMap<&str, String>> {
+        let mut pairs = HashMap::new();
+        while {
             self.eat_whitespace();
-            if !self.eat_self_terminating("[") {
-                return Ok(());
-            }
-            self.read_tag_name()
+            self.eat_self_terminating("[")
+        } {
+            let name = self
+                .read_tag_name()
                 .ok_or("invalid PGN: missing tag name")?;
             self.eat_whitespace();
-            self.read_string().ok_or("invalid PGN: missing tag value")?;
+            let value = self.parse_string()?;
             self.eat_whitespace();
             if !self.eat_self_terminating("]") {
                 Err("invalid PGN: unclosed tag pair")?
             }
+            if pairs.insert(name, value).is_some() {
+                Err(format!("invalid PGN: \"{}\" key defined twice", name))?
+            }
         }
+        Ok(pairs)
     }
 
     /// Parses an integer token.
@@ -438,8 +460,48 @@ impl<'a> PgnParser<'a> {
     }
 }
 
-pub fn parse_turns(pgn: &str) -> crate::Result<Vec<AnnotatedAlgebraicTurn>> {
-    let mut parser = PgnParser::new(pgn);
-    parser.skip_tag_pair_section()?;
-    parser.parse_movetext_section()
+#[derive(Debug)]
+pub struct PgnGame {
+    /// The starting position, if specified.
+    pub starting_position: Position,
+    /// The successive turns of the game.
+    ///
+    /// Does not contain numeric annotation glyphs.
+    pub turns: Vec<AnnotatedAlgebraicTurn>,
+}
+
+impl PgnGame {
+    /// Returns the number of halfmoves in this game.
+    pub fn len(&self) -> usize {
+        self.turns.len()
+    }
+}
+
+impl FromStr for PgnGame {
+    type Err = String;
+
+    fn from_str(s: &str) -> crate::Result<Self> {
+        let mut parser = PgnParser::new(s);
+        let tag_pairs = parser.parse_tag_pair_section()?;
+        let starting_position = match tag_pairs.get("SetUp").map(String::as_ref) {
+            Some("1") => {
+                let fen = tag_pairs
+                    .get("FEN")
+                    .ok_or("invalid PGN: missing FEN tag (SetUp tag is set to \"1\")")?;
+                parse_fen(fen)?
+            }
+            Some("0") | None => {
+                if tag_pairs.contains_key("FEN") {
+                    Err("warning: PGN contains a FEN tag, but SetUp tag is not set to \"1\"")?
+                }
+                Position::default()
+            }
+            Some(v) => Err(format!("invalid PGN: illegal value for tag SetUp: {:?}", v))?,
+        };
+        let turns = parser.parse_movetext_section()?;
+        Ok(Self {
+            starting_position,
+            turns,
+        })
+    }
 }

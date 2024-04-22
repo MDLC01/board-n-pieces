@@ -61,9 +61,7 @@ fn parse_int(fen: &str) -> crate::Result<u32> {
 }
 
 /// Parses Forsyth–Edwards Notation (FEN) into a position.
-pub fn parse_fen(fen: &[u8]) -> crate::Result<Position> {
-    let fen = std::str::from_utf8(fen).map_err(|_| "internal error: FEN should be valid UTF-8")?;
-
+pub fn parse_fen(fen: &str) -> crate::Result<Position> {
     let mut parts = fen.split(' ');
 
     let board = parse_board(parts.next().ok_or("invalid FEN: missing board info")?)?;
