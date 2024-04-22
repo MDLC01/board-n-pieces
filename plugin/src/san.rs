@@ -669,7 +669,7 @@ impl FromStr for AlgebraicTurn {
 }
 
 #[derive(Debug, Copy, Clone)]
-enum Mark {
+pub enum Mark {
     Check,
     Checkmate,
 }
@@ -690,7 +690,7 @@ impl Name for Mark {
 }
 
 #[derive(Debug, Copy, Clone)]
-enum Annotation {
+pub enum Annotation {
     Blunder,
     Mistake,
     Dubious,

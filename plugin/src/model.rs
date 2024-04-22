@@ -479,6 +479,7 @@ impl Position {
 }
 
 impl Default for Position {
+    /// Returns the standard starting position.
     fn default() -> Self {
         #![allow(non_snake_case)]
         let P = SquareContent::Piece(Piece::new(Color::White, PieceKind::Pawn));
