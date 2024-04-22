@@ -17,6 +17,11 @@ impl<'a> PgnParser<'a> {
         Self { content }
     }
 
+    /// Returns a boolean indicating whether there are remaining characters to read.
+    fn can_read(&self) -> bool {
+        !self.content.is_empty()
+    }
+
     /// Tests if a character is a white space character.
     ///
     /// # Definition
@@ -156,7 +161,7 @@ impl<'a> PgnParser<'a> {
     /// The length limit on symbols is not enforced by this parser.
     ///
     /// [the specification]: https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt
-    fn read_tag_name(&mut self) -> Option<&'a str> {
+    fn read_tag_name<'b>(&'b mut self) -> Option<&'a str> {
         let i = self.content.find(|c| !Self::is_tag_name_char(c))?;
         let (token, remainder) = self.content.split_at(i);
         if token.starts_with(Self::is_tag_name_start) {
@@ -232,7 +237,7 @@ impl<'a> PgnParser<'a> {
     /// [The specification] defines the tag pair section in section 8.1.
     ///
     /// [the specification]: https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt
-    fn parse_tag_pair_section(&mut self) -> crate::Result<HashMap<&str, String>> {
+    fn parse_tag_pair_section<'b>(&'b mut self) -> crate::Result<HashMap<&'a str, String>> {
         let mut pairs = HashMap::new();
         while {
             self.eat_whitespace();
@@ -317,7 +322,7 @@ impl<'a> PgnParser<'a> {
     ///
     /// If a movetext SAN-notated move is read, a slice containing the entire SAN-notated turn,
     /// wrapped in `Some`, is returned. Otherwise, `None` is returned.
-    fn read_movetext_san(&mut self) -> Option<&str> {
+    fn read_movetext_san<'b>(&'b mut self) -> Option<&'a str> {
         let i = self
             .content
             .find(Self::is_whitespace)
@@ -483,6 +488,11 @@ impl FromStr for PgnGame {
     fn from_str(s: &str) -> crate::Result<Self> {
         let mut parser = PgnParser::new(s);
         let tag_pairs = parser.parse_tag_pair_section()?;
+        let turns = parser.parse_movetext_section()?;
+        parser.advance()?;
+        if parser.can_read() {
+            Err("the PGN function accepts a single PGN game")?
+        }
         let starting_position = match tag_pairs.get("SetUp").map(String::as_ref) {
             Some("1") => {
                 let fen = tag_pairs
@@ -498,7 +508,6 @@ impl FromStr for PgnGame {
             }
             Some(v) => Err(format!("invalid PGN: illegal value for tag SetUp: {:?}", v))?,
         };
-        let turns = parser.parse_movetext_section()?;
         Ok(Self {
             starting_position,
             turns,

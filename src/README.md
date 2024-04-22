@@ -72,6 +72,8 @@ Similarly to the `game` function, the `pgn` function creates an array of positio
 #let positions = pgn(read("game.pgn"))
 ```
 
+Note that the argument to `pgn` must describe a single game. if you have a PGN file containing multiple games, you will need to split them using other means.
+
 
 ## Customizing a chessboard
 
