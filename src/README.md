@@ -52,15 +52,25 @@ The `game` function creates an array of positions from a full chess game. A game
 ```example
 %show: pad.with(0.5cm)
 The scholar's mate:
-#let g = game("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
+#let positions = game("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
 #grid(
   columns: (auto, ) * 4,
   gutter: 0.2cm,
-  ..g.map(board.with(square-size: 0.5cm)),
+  ..positions.map(board.with(square-size: 0.5cm)),
 )
 ```
 
 You can specify an alternative starting position to the `game` function with the `starting-position` named argument.
+
+
+## Using the `pgn` function to import PGN files
+
+Similarly to the `game` function, the `pgn` function creates an array of positions. It accepts a single argument, which is a string containing [portable game notation](https://en.wikipedia.org/wiki/Portable_Game_Notation). To read a game from a PGN file, you can use this function in combination with Typst's native [`read`](https://typst.app/docs/reference/data-loading/read/) function.
+
+<!-- This is intentionally not an example, because no `game.pgn` file exists. -->
+```typ
+#let positions = pgn(read("game.pgn"))
+```
 
 
 ## Customizing a chessboard
