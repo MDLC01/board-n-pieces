@@ -93,3 +93,8 @@
 #let g = bnp.game("e4 e6 d4 d5 e5 c5 c3 cxd4 cxd4 Bb4+ Nc3 Nc6 Nf3 Nge7 Bd3 O-O Bxh7+ Kxh7 Ng5+ Kg6 h4 Nxd4 Qg4 f5 h5+ Kh6 Nxe6+ g5 hxg6#")
 
 #bnp.board(g.last())
+
+---
+// https://lichess.org/NuxTdFcv#99
+#let g = bnp.pgn(read("assets/lichess-NuxTdFcv.pgn"))
+#bnp.board(g.last())
