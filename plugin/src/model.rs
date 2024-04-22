@@ -420,13 +420,6 @@ impl CastlingAvailabilities {
         black_queenside: true,
     };
 
-    pub const NONE: Self = Self {
-        white_kingside: false,
-        white_queenside: false,
-        black_kingside: false,
-        black_queenside: false,
-    };
-
     pub fn kingside_for(self, color: Color) -> bool {
         match color {
             Color::White => self.white_kingside,
@@ -438,6 +431,21 @@ impl CastlingAvailabilities {
         match color {
             Color::White => self.white_queenside,
             Color::Black => self.black_queenside,
+        }
+    }
+
+    pub fn remove_for(self, color: Color) -> Self {
+        match color {
+            Color::White => Self {
+                white_kingside: false,
+                white_queenside: false,
+                ..self
+            },
+            Color::Black => Self {
+                black_kingside: false,
+                black_queenside: false,
+                ..self
+            },
         }
     }
 }

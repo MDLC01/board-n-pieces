@@ -1,6 +1,4 @@
-use crate::model::{
-    CastlingAvailabilities, Color, File, Piece, PieceKind, Position, Rank, Square, SquareContent,
-};
+use crate::model::{Color, File, Piece, PieceKind, Position, Rank, Square, SquareContent};
 use crate::utils::{CharExt, Finite, Name, OptionExt, StrExt};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
@@ -507,7 +505,9 @@ impl AlgebraicTurn {
                 Ok(Position {
                     board: new_board,
                     active: position.active.other(),
-                    castling_availabilities: CastlingAvailabilities::NONE,
+                    castling_availabilities: position
+                        .castling_availabilities
+                        .remove_for(position.active),
                     en_passant_target_square: None,
                     halfmove: position.fullmove + 1,
                     fullmove,
