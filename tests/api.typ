@@ -95,6 +95,6 @@
 #bnp.board(g.last())
 
 ---
-// https://lichess.org/NuxTdFcv#99
+// https://lichess.org/NuxTdFcv
 #let g = bnp.pgn(read("assets/lichess-NuxTdFcv.pgn"))
 #bnp.board(g.last())
