@@ -104,6 +104,14 @@
 }
 
 
+/// Creates an array containing the successive positions of a game described
+/// using Portable Game Notation.
+#let pgn(pgn-string) = {
+  import "internals.typ": game-from-pgn
+  game-from-pgn(pgn-string)
+}
+
+
 /// Displays a position on a chess board.
 ///
 /// A position can be created using the `position` function.

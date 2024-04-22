@@ -11,6 +11,16 @@
   ))
 }
 
+#let game-from-pgn(pgn) = {
+  let game = functions.game_from_pgn(
+    bytes(pgn),
+  )
+  array(game).split(0).map(position => (
+    type: "board-n-pieces:fen",
+    fen: str(bytes(position))
+  ))
+}
+
 /// Converts a `board-n-pieces:fen-position` to a `board-n-pieces:position`.
 /// For positions, this is the identity function.
 #let resolve-position(position) = {

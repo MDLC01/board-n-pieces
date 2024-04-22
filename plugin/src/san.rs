@@ -725,7 +725,7 @@ impl Name for Annotation {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct AnnotatedAlgebraicTurn {
     turn: AlgebraicTurn,
     #[allow(unused)]
@@ -750,6 +750,12 @@ impl FromStr for AnnotatedAlgebraicTurn {
     }
 }
 
-pub fn parse_turn(s: &str) -> crate::Result<AlgebraicTurn> {
-    Ok(s.parse::<AnnotatedAlgebraicTurn>()?.turn)
+impl AnnotatedAlgebraicTurn {
+    pub fn apply(self, turn_index: usize, position: &Position) -> crate::Result<Position> {
+        self.turn.apply(turn_index, position)
+    }
+}
+
+pub fn parse_turn(s: &str) -> crate::Result<AnnotatedAlgebraicTurn> {
+    s.parse()
 }
