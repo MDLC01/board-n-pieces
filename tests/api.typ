@@ -98,3 +98,30 @@
 // https://lichess.org/NuxTdFcv
 #let g = bnp.pgn(read("assets/lichess-NuxTdFcv.pgn"))
 #bnp.board(g.last())
+
+---
+#bnp.board(
+  bnp.starting-position,
+  stroke: stroke(paint: red, thickness: 5pt, dash: "dotted"),
+)
+
+---
+#bnp.board(
+  bnp.starting-position,
+  display-numbers: true,
+  stroke: 1pt + black,
+)
+
+---
+#bnp.board(
+  bnp.starting-position,
+  display-numbers: true,
+  stroke: (y: blue),
+)
+
+---
+#bnp.board(
+  bnp.starting-position,
+  display-numbers: true,
+  stroke: (bottom: none, rest: green),
+)

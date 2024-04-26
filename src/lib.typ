@@ -144,8 +144,12 @@
   highlighted-black-square-color: rgb("E5694E"),
   /// How to display each piece.
   pieces: auto,
+  /// The stroke displayed around the board.
+  ///
+  /// Use the same structure as `rect.stroke`.
+  stroke: none,
 ) = {
-  import "internals.typ": resolve-position, square-coordinates
+  import "internals.typ": resolve-position, stroke-sides, square-coordinates
 
   position = resolve-position(position)
 
@@ -170,6 +174,8 @@
       k: image("assets/kb.svg", width: 100%),
     )
   }
+
+  let stroke = stroke-sides(stroke)
 
   let height = position.board.len()
   assert(height > 0, message: "Board cannot be empty.")
@@ -222,6 +228,47 @@
 
   if reverse {
     grid-elements = grid-elements.rev()
+  }
+
+  {
+    let index-inset = if display-numbers { 1 } else { 0 }
+
+    let first-rank-index = index-inset
+    let last-rank-index = first-rank-index + height
+    let first-file-index = index-inset
+    let last-file-index = first-file-index + width
+
+    // Left line.
+    grid-elements.push(grid.vline(
+      x: first-file-index,
+      stroke: stroke.left,
+      start: first-rank-index,
+      end: last-rank-index,
+    ))
+
+    // Top stroke.
+    grid-elements.push(grid.hline(
+      y: first-rank-index,
+      stroke: stroke.top,
+      start: first-file-index,
+      end: last-file-index,
+    ))
+
+    // Right line.
+    grid-elements.push(grid.vline(
+      x: last-file-index,
+      stroke: stroke.right,
+      start: first-rank-index,
+      end: last-rank-index,
+    ))
+
+    // Bottom line.
+    grid-elements.push(grid.hline(
+      y: last-rank-index,
+      stroke: stroke.bottom,
+      start: first-file-index,
+      end: last-file-index,
+    ))
   }
 
   highlighted-squares = highlighted-squares.map(s => {

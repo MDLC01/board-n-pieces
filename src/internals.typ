@@ -78,3 +78,24 @@
   let (f, r) = s.clusters()
   (file-index(f), rank-index(r))
 }
+
+#let stroke-sides(arg) = {
+  let sides = rect(stroke: arg).stroke
+
+  if type(sides) != dictionary {
+    sides = (
+      left: sides,
+      top: sides,
+      right: sides,
+      bottom: sides,
+    )
+  }
+
+  (
+    left: none,
+    top: none,
+    right: none,
+    bottom: none,
+    ..sides,
+  )
+}
