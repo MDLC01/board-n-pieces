@@ -134,14 +134,14 @@
 
   /// The size of each square.
   square-size: 1cm,
-  /// The background color of white squares.
-  white-square-color: rgb("FFCE9E"),
-  /// The background color of black squares.
-  black-square-color: rgb("D18B47"),
-  /// The background color of highlighted white squares.
-  highlighted-white-square-color: rgb("EF765F"),
-  /// The background color of highlighted black squares.
-  highlighted-black-square-color: rgb("E5694E"),
+  /// How to fill white squares.
+  white-square-fill: rgb("FFCE9E"),
+  /// How to fill black squares.
+  black-square-fill: rgb("D18B47"),
+  /// How to fill highlighted white squares.
+  highlighted-white-square-fill: rgb("EF765F"),
+  /// How to fill highlighted black squares.
+  highlighted-black-square-fill: rgb("E5694E"),
   /// How to display each piece.
   pieces: auto,
   /// The stroke displayed around the board.
@@ -293,15 +293,15 @@
       }
       if calc.even(x + y) {
         if (x, y) in highlighted-squares {
-          highlighted-white-square-color
+          highlighted-white-square-fill
         } else {
-          white-square-color
+          white-square-fill
         }
       } else {
         if (x, y) in highlighted-squares {
-          highlighted-black-square-color
+          highlighted-black-square-fill
         } else {
-          black-square-color
+          black-square-fill
         }
       }
     },

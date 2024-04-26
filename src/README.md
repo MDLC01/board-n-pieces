@@ -89,9 +89,9 @@ The `board` function lets you customize the appearance of the board with multipl
 
 - `square-size` is a length describing the size of each square. By default, this is `1cm`.
 
-- `white-square-color` and `black-square-color` correspond to the background color of squares.
+- `white-square-fill` and `black-square-fill` indicate how squares should be filled. They can be colors, gradient or patterns.
 
-- `highlighted-white-square-color` and `highlighted-black-square-color` correspond to the background color of highlighted squares.
+- `highlighted-white-square-fill` and `highlighted-black-square-fill` indicate how highlighted squares should be filled. For highlighted squares, this is applied instead of `white-square-fill` and `black-square-fill`.
 
 - `pieces` is a dictionary containing images representing each piece. If specified, the dictionary must contain an entry for every piece kind in the displayed position. Keys are single upper-case letters for white pieces and single lower-case letters for black pieces. The default images are taken from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). Please refer to [the section on licensing](#licensing) for information on how you can use them in your documents.
 
