@@ -54,7 +54,7 @@ The `game` function creates an array of positions from a full chess game. A game
 The scholar's mate:
 #let positions = game("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
 #grid(
-  columns: (auto, ) * 4,
+  columns: 4,
   gutter: 0.2cm,
   ..positions.map(board.with(square-size: 0.5cm)),
 )
