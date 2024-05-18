@@ -371,14 +371,16 @@ pub enum AlgebraicTurn {
 }
 
 impl AlgebraicTurn {
-    pub fn apply(self, turn_index: usize, position: &Position) -> crate::Result<Position> {
-        let turn_string = format!(
+    fn to_indexed_string(self, index: usize) -> String {
+        format!(
             "{}{} {}",
-            turn_index / 2 + 1,
-            if turn_index % 2 == 0 { "." } else { "..." },
+            index / 2 + 1,
+            if index % 2 == 0 { "." } else { "..." },
             self
-        );
+        )
+    }
 
+    pub fn apply(self, turn_index: usize, position: &Position) -> crate::Result<Position> {
         let fullmove = if position.active == Color::Black {
             position.fullmove + 1
         } else {
@@ -406,10 +408,16 @@ impl AlgebraicTurn {
                         && departure_rank.is_none_or(|rank| m.from.rank() == rank)
                 });
                 let Some(turn) = possible_moves.next() else {
-                    Err(format!("illegal move: {turn_string}"))?
+                    Err(format!(
+                        "illegal move: {}",
+                        self.to_indexed_string(turn_index)
+                    ))?
                 };
                 if possible_moves.next().is_some() {
-                    Err(format!("ambiguous move: {turn_string}"))?
+                    Err(format!(
+                        "ambiguous move: {}",
+                        self.to_indexed_string(turn_index)
+                    ))?
                 }
 
                 let mut new_board = position.board.clone();
@@ -483,7 +491,10 @@ impl AlgebraicTurn {
                     }
                 };
                 if !requirements {
-                    Err(format!("illegal move: {turn_string}"))?
+                    Err(format!(
+                        "illegal move: {}",
+                        self.to_indexed_string(turn_index)
+                    ))?
                 }
 
                 let mut new_board = position.board.clone();
