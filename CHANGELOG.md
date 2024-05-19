@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.3.0
+
+- Detect moves that put the king in check as illegal, improving SAN support.
+
+- Add `stroke` argument to the `board` function.
+
+- Rename `{highlighted-,}{white,black}-square-color` arguments to the `board` function to `{highlighted-,}{white,black}-square-fill`.
+
 ## Version 0.2.0
 
 - Allow using dashes for empty squares in `position` function.

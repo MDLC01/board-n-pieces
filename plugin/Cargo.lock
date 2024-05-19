@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "board-n-pieces-plugin"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "wasm-minimal-protocol",
 ]
