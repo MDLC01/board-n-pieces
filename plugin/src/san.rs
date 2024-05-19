@@ -543,7 +543,7 @@ impl AlgebraicTurn {
                         .castling_availabilities
                         .remove_for(initial_position.active),
                     en_passant_target_file: None,
-                    halfmove: initial_position.fullmove + 1,
+                    halfmove: initial_position.halfmove + 1,
                     fullmove: initial_position.next_fullmove(),
                 })
             }
