@@ -1,4 +1,4 @@
-#import "../target/lib.typ" as bnp
+#import sys.inputs.lib as bnp
 
 // Test starting position.
 #assert.eq(bnp.starting-position.fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")

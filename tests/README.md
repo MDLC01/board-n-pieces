@@ -5,13 +5,9 @@ This directory contains a small test suite for Board & Pieces.
 
 ## Run the tests
 
-To run the tests, first build the package, and then run the following command within the project's root directory. Tests pass if the compilation succeeds and Git does not detect any change in the images under [`refs/`](refs/).
-
-```shell
-typst compile ./tests/tests.typ './tests/refs/test-{n}.png' --root .
-```
+The tests are ran automatically when building using the build script. Tests pass if the compilation succeeds and Git does not detect any change in the images under [`refs/`](refs/).
 
 
 ## Structure
 
-Tests for the package's public interface are stored in [`api.typ`](api.typ). Other tests are located in [`tests.typ`](tests.typ).
+All tests are included in [`tests.typ`](tests.typ). They are split into different files: tests for the package's public interface are stored in [`api.typ`](api.typ), while tests for the logic (mainly the PGN parser) are located in [`logic.typ`](logic.typ).

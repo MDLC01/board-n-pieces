@@ -1,4 +1,4 @@
-#import "../target/lib.typ" as bnp
+#import sys.inputs.lib as bnp
 
 #set document(date: none)
 

@@ -4,6 +4,7 @@
 import os
 import shutil
 import subprocess
+import sys
 
 from pathlib import Path
 
@@ -11,9 +12,16 @@ from pathlib import Path
 LIBRARY_DIR = Path('src/')
 PLUGIN_DIR = Path('plugin/')
 TARGET_DIR = Path('target/')
+TEST_DIR = Path('tests/')
 LICENSE = Path('LICENSE')
 CHANGELOG = Path('CHANGELOG.md')
 README = 'README.md'
+
+
+def delete_directory_content(directory):
+    if directory.exists():
+        shutil.rmtree(directory)
+    directory.mkdir(parents=True)
 
 
 def read_exclude_file(path: Path) -> list[str]:
@@ -61,7 +69,7 @@ def build_plugin():
 def build_readme():
     print('Building README...')
 
-    EXAMPLES_DIR = Path('examples')
+    EXAMPLES_DIR = Path('examples/')
 
     final_lines = []
 
@@ -133,14 +141,32 @@ def build_readme():
         f.write('\n'.join(final_lines))
 
 
-def main():
-    if TARGET_DIR.exists():
-        shutil.rmtree(TARGET_DIR)
-    TARGET_DIR.mkdir(parents=True)
+def test():
+    print('Running tests...')
 
+    LIB_ROOT = TARGET_DIR.joinpath('lib.typ')
+    REF_DIR = TEST_DIR.joinpath('refs/')
+
+    delete_directory_content(REF_DIR)
+
+    subprocess.run(
+        [
+            'typst', 'compile',
+            str(TEST_DIR.joinpath('tests.typ')),
+            str(REF_DIR.joinpath('test-{n}.png')),
+            '--input', f'lib={os.path.relpath(LIB_ROOT, TEST_DIR)}',
+            '--root', '.',
+        ],
+        check=True,
+    )
+
+
+def main():
+    delete_directory_content(TARGET_DIR)
     copy_library()
     build_plugin()
     build_readme()
+    test()
 
 
 if __name__ == '__main__':
