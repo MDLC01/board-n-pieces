@@ -84,6 +84,14 @@ pub fn parse_fen(fen: &str) -> crate::Result<Position> {
             .next()
             .ok_or("invalid FEN: missing en passant target square")?,
     )?;
+    if let Some(square) = en_passant_target_square {
+        if square.rank() != active.en_passant_target_rank() {
+            Err(format!(
+                "invalid FEN: illegal en passant target square (invalid rank): {}",
+                square
+            ))?
+        }
+    }
 
     let halfmove = parse_int(parts.next().ok_or("invalid FEN: missing fullmove")?)?;
 
@@ -97,7 +105,7 @@ pub fn parse_fen(fen: &str) -> crate::Result<Position> {
         board,
         active,
         castling_availabilities,
-        en_passant_target_square,
+        en_passant_target_file: en_passant_target_square.map(Square::file),
         halfmove,
         fullmove,
     })
@@ -172,7 +180,7 @@ pub fn fen(position: Position) -> String {
         fen_board(position.board),
         fen_color(position.active),
         fen_castling_availabilities(position.castling_availabilities),
-        match position.en_passant_target_square {
+        match position.en_passant_target_file {
             None => "-".to_string(),
             Some(square) => square.name(),
         },

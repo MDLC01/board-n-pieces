@@ -125,3 +125,8 @@
   display-numbers: true,
   stroke: (bottom: none, rest: green),
 )
+
+---
+// https://lichess.org/4cCk7Gi5
+#let g = bnp.pgn(read("assets/lichess-4cCk7Gi5.pgn"))
+#bnp.board(g.last())

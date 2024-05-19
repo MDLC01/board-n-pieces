@@ -301,6 +301,22 @@ impl Color {
             Self::Black => Self::White,
         }
     }
+
+    /// Returns the rank pawns of this color have to target to capture en passant.
+    pub fn en_passant_target_rank(self) -> Rank {
+        match self {
+            Self::White => Rank::Six,
+            Self::Black => Rank::Three,
+        }
+    }
+
+    /// Returns the rank in which pawns of the other color can be captured en passant.
+    pub fn en_passant_capture_rank(self) -> Rank {
+        match self {
+            Self::White => Rank::Five,
+            Self::Black => Rank::Four,
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone, Default, Eq, PartialEq)]
@@ -312,6 +328,19 @@ pub enum PieceKind {
     Rook,
     Queen,
     King,
+}
+
+impl Finite for PieceKind {
+    fn values() -> impl IntoIterator<Item = Self> {
+        [
+            Self::Pawn,
+            Self::Knight,
+            Self::Bishop,
+            Self::Rook,
+            Self::Queen,
+            Self::King,
+        ]
+    }
 }
 
 impl FromChar for PieceKind {
@@ -456,7 +485,7 @@ pub struct Position {
     /// The color that will play next.
     pub active: Color,
     pub castling_availabilities: CastlingAvailabilities,
-    pub en_passant_target_square: Option<Square>,
+    pub en_passant_target_file: Option<File>,
     pub halfmove: u32,
     pub fullmove: u32,
 }
@@ -467,7 +496,7 @@ impl Position {
             board,
             active: Color::White,
             castling_availabilities: CastlingAvailabilities::ALL,
-            en_passant_target_square: None,
+            en_passant_target_file: None,
             halfmove: 0,
             fullmove: 1,
         }
@@ -475,6 +504,14 @@ impl Position {
 
     pub fn at(&self, square: Square) -> SquareContent {
         self.board[square]
+    }
+
+    pub fn next_fullmove(&self) -> u32 {
+        if self.active == Color::Black {
+            self.fullmove + 1
+        } else {
+            self.fullmove
+        }
     }
 }
 

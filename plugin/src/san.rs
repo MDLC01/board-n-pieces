@@ -9,23 +9,23 @@ enum EnPassantMetadata {
     #[default]
     /// Nothing relevant to report.
     Nothing,
-    /// In case of a two-square pawn move, this is the square that was skipped.
-    SkippedSquare(Square),
-    /// In case of an en passant capture, this is the square that was captures.
-    EnPassantCaptureSquare(Square),
+    /// In case of a two-square pawn move, this is the file of the square that was skipped.
+    SkipFile(File),
+    /// In case of an en passant capture, this is the file of the square that was captured.
+    EnPassantCaptureFile(File),
 }
 
 impl EnPassantMetadata {
-    fn skipped_square(self) -> Option<Square> {
+    fn skip_file(self) -> Option<File> {
         match self {
-            Self::SkippedSquare(square) => Some(square),
+            Self::SkipFile(file) => Some(file),
             _ => None,
         }
     }
 
-    fn en_passant_capture_square(self) -> Option<Square> {
+    fn en_passant_capture_file(self) -> Option<File> {
         match self {
-            Self::EnPassantCaptureSquare(square) => Some(square),
+            Self::EnPassantCaptureFile(file) => Some(file),
             _ => None,
         }
     }
@@ -40,6 +40,57 @@ struct Move<S = Square> {
     removes_kingside_castling_ability: bool,
     /// `true` if, and only if, this move removes the ability to queenside castle.
     removes_queenside_castling_ability: bool,
+}
+
+impl Move {
+    pub fn apply(
+        self,
+        position: &Position,
+        piece: PieceKind,
+        capture: bool,
+        promotion: Option<PieceKind>,
+    ) -> Position {
+        let mut new_board = position.board.clone();
+        new_board[self.from] = SquareContent::Empty;
+        let final_piece = Piece::new(position.active, promotion.unwrap_or(piece));
+        new_board[self.to] = SquareContent::Piece(final_piece);
+        if let Some(capture_file) = self.en_passant_metadata.en_passant_capture_file() {
+            let capture_square =
+                Square::new(capture_file, position.active.en_passant_capture_rank());
+            new_board[capture_square] = SquareContent::Empty
+        }
+
+        let mut castling_availabilities = position.castling_availabilities;
+        if self.removes_kingside_castling_ability {
+            if position.active == Color::White {
+                castling_availabilities.white_kingside = false
+            } else {
+                castling_availabilities.black_kingside = false
+            }
+        }
+        if self.removes_queenside_castling_ability {
+            if position.active == Color::White {
+                castling_availabilities.white_queenside = false
+            } else {
+                castling_availabilities.black_queenside = false
+            }
+        }
+
+        let halfmove = if capture || piece == PieceKind::Pawn {
+            0
+        } else {
+            position.halfmove + 1
+        };
+
+        Position {
+            board: new_board,
+            active: position.active.other(),
+            castling_availabilities,
+            en_passant_target_file: self.en_passant_metadata.skip_file(),
+            halfmove,
+            fullmove: position.next_fullmove(),
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -59,6 +110,14 @@ impl LocalSquare {
             color,
             local_file: local_square.file(),
             local_rank: local_square.rank(),
+        }
+    }
+
+    pub fn to_absolute(self) -> Square {
+        let local_square = Square::new(self.local_file, self.local_rank);
+        match self.color {
+            Color::White => local_square,
+            Color::Black => local_square.transpose(),
         }
     }
 
@@ -113,11 +172,7 @@ impl LocalSquare {
 
 impl From<LocalSquare> for Square {
     fn from(value: LocalSquare) -> Self {
-        let local_square = Self::new(value.local_file, value.local_rank);
-        match value.color {
-            Color::White => local_square,
-            Color::Black => local_square.transpose(),
-        }
+        value.to_absolute()
     }
 }
 
@@ -136,14 +191,16 @@ impl LocalMove {
 
     fn with_skipped_square(self, square: LocalSquare) -> Self {
         Self {
-            en_passant_metadata: EnPassantMetadata::SkippedSquare(square.into()),
+            en_passant_metadata: EnPassantMetadata::SkipFile(square.to_absolute().file()),
             ..self
         }
     }
 
     fn with_en_passant_capture(self, square: LocalSquare) -> Self {
         Self {
-            en_passant_metadata: EnPassantMetadata::EnPassantCaptureSquare(square.into()),
+            en_passant_metadata: EnPassantMetadata::EnPassantCaptureFile(
+                square.to_absolute().file(),
+            ),
             ..self
         }
     }
@@ -217,11 +274,9 @@ macro_rules! generate_composite_move {
     }
 }
 
-/// Returns all valid moves pieces of a specific kind can make in a specific position, not including
-/// castling moves.
-fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<Move>> {
-    // FIXME: We should not include moves that put the king in a check position.
-
+/// Returns all valid moves pieces of a specific kind can make in a specific position. This does not
+/// include castling moves, and does not exclude moves that put the king in a check position.
+fn valid_moves(position: &Position, piece_kind: PieceKind) -> Vec<Move> {
     let mut moves = Vec::new();
     for global_square in Square::all() {
         let departure = LocalSquare::from_absolute(position.active, global_square);
@@ -265,11 +320,10 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
                         moves.push(LocalMove::new(departure, destination))
                     }
 
-                    if position.en_passant_target_square == Some(destination.into()) {
-                        let square = destination.backward().ok_or(format!(
-                            "internal error: unexpected en passant target square in {}",
-                            Square::from(destination),
-                        ))?;
+                    if destination.local_rank == Rank::Six
+                        && position.en_passant_target_file == Some(destination.to_absolute().file())
+                    {
+                        let square = destination.backward().unwrap();
                         moves.push(
                             LocalMove::new(departure, destination).with_en_passant_capture(square),
                         )
@@ -347,7 +401,7 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> crate::Result<Vec<
         }
     }
 
-    Ok(moves.into_iter().map(|m| m.into()).collect())
+    moves.into_iter().map(|m| m.into()).collect()
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -380,13 +434,7 @@ impl AlgebraicTurn {
         )
     }
 
-    pub fn apply(self, turn_index: usize, position: &Position) -> crate::Result<Position> {
-        let fullmove = if position.active == Color::Black {
-            position.fullmove + 1
-        } else {
-            position.fullmove
-        };
-
+    pub fn apply(self, turn_index: usize, initial_position: &Position) -> crate::Result<Position> {
         match self {
             Self::Normal {
                 destination_file,
@@ -397,97 +445,72 @@ impl AlgebraicTurn {
                 capture,
                 promotion,
             } => {
-                let valid_moves = valid_moves(position, piece)?;
                 // FIXME: When a turn is disambiguated using the rank of departure, this means it cannot be
                 //  disambiguated using the departure file, which is an additional information that we don't
                 //  currently take into account.
-                let mut possible_moves = valid_moves.clone().into_iter().filter(|m| {
-                    m.to.file() == destination_file
-                        && m.to.rank() == destination_rank
-                        && departure_file.is_none_or(|file| m.from.file() == file)
-                        && departure_rank.is_none_or(|rank| m.from.rank() == rank)
-                });
-                let Some(turn) = possible_moves.next() else {
+                let mut possible_new_positions = valid_moves(initial_position, piece)
+                    .into_iter()
+                    // Filter moves that do not match the algebraic notation.
+                    .filter(|m| {
+                        m.to.file() == destination_file
+                            && m.to.rank() == destination_rank
+                            && departure_file.is_none_or(|file| m.from.file() == file)
+                            && departure_rank.is_none_or(|rank| m.from.rank() == rank)
+                    })
+                    // Get corresponding positions.
+                    .map(|m| m.apply(initial_position, piece, capture, promotion))
+                    // Filter moves that put the king in a check position.
+                    .filter(|new_position| {
+                        let king = Piece::new(initial_position.active, PieceKind::King);
+                        PieceKind::iter()
+                            .flat_map(|piece| valid_moves(new_position, piece))
+                            .all(|m| !new_position.at(m.to).is(king))
+                    });
+
+                let Some(new_position) = possible_new_positions.next() else {
                     Err(format!(
                         "illegal move: {}",
                         self.to_indexed_string(turn_index)
                     ))?
                 };
-                if possible_moves.next().is_some() {
+                if possible_new_positions.next().is_some() {
                     Err(format!(
                         "ambiguous move: {}",
                         self.to_indexed_string(turn_index)
                     ))?
                 }
 
-                let mut new_board = position.board.clone();
-                new_board[turn.from] = SquareContent::Empty;
-                let final_piece = Piece::new(position.active, promotion.unwrap_or(piece));
-                new_board[turn.to] = SquareContent::Piece(final_piece);
-                if let Some(capture) = turn.en_passant_metadata.en_passant_capture_square() {
-                    new_board[capture] = SquareContent::Empty
-                }
-
-                let mut castling_availabilities = position.castling_availabilities;
-                if turn.removes_kingside_castling_ability {
-                    if position.active == Color::White {
-                        castling_availabilities.white_kingside = false
-                    } else {
-                        castling_availabilities.black_kingside = false
-                    }
-                }
-                if turn.removes_queenside_castling_ability {
-                    if position.active == Color::White {
-                        castling_availabilities.white_queenside = false
-                    } else {
-                        castling_availabilities.black_queenside = false
-                    }
-                }
-
-                let halfmove = if capture || piece == PieceKind::Pawn {
-                    0
-                } else {
-                    position.halfmove + 1
-                };
-
-                Ok(Position {
-                    board: new_board,
-                    active: position.active.other(),
-                    castling_availabilities,
-                    en_passant_target_square: turn.en_passant_metadata.skipped_square(),
-                    halfmove,
-                    fullmove,
-                })
+                Ok(new_position)
             }
 
             Self::Castle(side) => {
-                let rank = if position.active == Color::White {
+                let rank = if initial_position.active == Color::White {
                     Rank::One
                 } else {
                     Rank::Eight
                 };
-                let king = Piece::new(position.active, PieceKind::King);
-                let rook = Piece::new(position.active, PieceKind::Rook);
+                let king = Piece::new(initial_position.active, PieceKind::King);
+                let rook = Piece::new(initial_position.active, PieceKind::Rook);
 
                 let requirements = match side {
                     Side::King => {
-                        position
+                        initial_position
                             .castling_availabilities
-                            .kingside_for(position.active)
-                            && position.at(Square::new(File::E, rank)).is(king)
-                            && position.at(Square::new(File::F, rank)).is_empty()
-                            && position.at(Square::new(File::G, rank)).is_empty()
-                            && position.at(Square::new(File::H, rank)).is(rook)
+                            .kingside_for(initial_position.active)
+                            && initial_position.at(Square::new(File::E, rank)).is(king)
+                            && initial_position.at(Square::new(File::F, rank)).is_empty()
+                            && initial_position.at(Square::new(File::G, rank)).is_empty()
+                            && initial_position.at(Square::new(File::H, rank)).is(rook)
                     }
                     Side::Queen => {
-                        position
+                        initial_position
                             .castling_availabilities
-                            .queenside_for(position.active)
-                            && position.at(Square::new(File::A, rank)).is(rook)
-                            && position.at(Square::new(File::B, rank)).is_empty()
-                            && position.at(Square::new(File::C, rank)).is_empty()
-                            && position.at(Square::new(File::D, rank)).is_empty()
-                            && position.at(Square::new(File::E, rank)).is(king)
+                            .queenside_for(initial_position.active)
+                            && initial_position.at(Square::new(File::A, rank)).is(rook)
+                            && initial_position.at(Square::new(File::B, rank)).is_empty()
+                            && initial_position.at(Square::new(File::C, rank)).is_empty()
+                            && initial_position.at(Square::new(File::D, rank)).is_empty()
+                            && initial_position.at(Square::new(File::E, rank)).is(king)
                     }
                 };
                 if !requirements {
@@ -497,7 +520,7 @@ impl AlgebraicTurn {
                     ))?
                 }
 
-                let mut new_board = position.board.clone();
+                let mut new_board = initial_position.board.clone();
                 match side {
                     Side::King => {
                         new_board[Square::new(File::E, rank)] = SquareContent::Empty;
@@ -515,13 +538,13 @@ impl AlgebraicTurn {
 
                 Ok(Position {
                     board: new_board,
-                    active: position.active.other(),
-                    castling_availabilities: position
+                    active: initial_position.active.other(),
+                    castling_availabilities: initial_position
                         .castling_availabilities
-                        .remove_for(position.active),
-                    en_passant_target_square: None,
-                    halfmove: position.fullmove + 1,
-                    fullmove,
+                        .remove_for(initial_position.active),
+                    en_passant_target_file: None,
+                    halfmove: initial_position.fullmove + 1,
+                    fullmove: initial_position.next_fullmove(),
                 })
             }
         }
