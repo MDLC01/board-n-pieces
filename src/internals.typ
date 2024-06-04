@@ -24,7 +24,7 @@
 /// Converts a `board-n-pieces:fen-position` to a `board-n-pieces:position`.
 /// For positions, this is the identity function.
 #let resolve-position(position) = {
-  let message = "Expected a position. You can construct a position with the `position` function."
+  let message = "expected a position (hint: you can construct a position with the `position` function)"
 
   assert.eq(type(position), dictionary, message: message)
 

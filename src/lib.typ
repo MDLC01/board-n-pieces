@@ -178,9 +178,9 @@
   let stroke = stroke-sides(stroke)
 
   let height = position.board.len()
-  assert(height > 0, message: "Board cannot be empty.")
+  assert(height > 0, message: "board cannot be empty")
   let width = position.board.at(0).len()
-  assert(width > 0, message: "Board cannot be empty.")
+  assert(width > 0, message: "board cannot be empty")
 
   let squares = (
     position.board
