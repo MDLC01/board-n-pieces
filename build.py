@@ -33,16 +33,12 @@ def read_exclude_file(path: Path) -> list[str]:
 def copy_library():
     print('Copying library...')
 
-    EXCLUDE_FILE = LIBRARY_DIR.joinpath('.exclude')
-
-    excluded_files = read_exclude_file(EXCLUDE_FILE)
-    excluded_files.append(os.path.normcase(EXCLUDE_FILE.relative_to(LIBRARY_DIR)))
-    excluded_files.append(os.path.normcase(LIBRARY_DIR.joinpath(README)))
+    README_PATH = os.path.normcase(LIBRARY_DIR.joinpath(README))
 
     for path, directories, files in os.walk(LIBRARY_DIR):
         for file in files:
             file_name = Path(path).relative_to(LIBRARY_DIR).joinpath(file)
-            if os.path.normcase(file_name) not in excluded_files:
+            if os.path.normcase(file_name) != README_PATH:
                 source = LIBRARY_DIR.joinpath(file_name)
                 destination = TARGET_DIR.joinpath(file_name)
                 destination.parent.mkdir(parents=True, exist_ok=True)
