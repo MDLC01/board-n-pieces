@@ -709,6 +709,7 @@ pub enum Mark {
 }
 
 impl Finite for Mark {
+    #[allow(refining_impl_trait)]
     fn values() -> [Self; 2] {
         [Self::Check, Self::Checkmate]
     }
@@ -734,6 +735,7 @@ pub enum Annotation {
 }
 
 impl Finite for Annotation {
+    #[allow(refining_impl_trait)]
     fn values() -> [Self; 6] {
         [
             Self::Blunder,

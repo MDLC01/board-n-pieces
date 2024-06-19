@@ -279,9 +279,7 @@ impl<'a> PgnParser<'a> {
     ///
     /// [the specification]: https://ia902908.us.archive.org/26/items/pgn-standard-1994-03-12/PGN_standard_1994-03-12.txt
     fn parse_integer(&mut self) -> Option<usize> {
-        let Some(i) = self.content.find(|c: char| !c.is_ascii_digit()) else {
-            return None;
-        };
+        let i = self.content.find(|c: char| !c.is_ascii_digit())?;
         let (token, remainder) = self.content.split_at(i);
         if token.is_empty() {
             return None;
