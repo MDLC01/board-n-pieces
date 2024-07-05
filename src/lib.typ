@@ -44,31 +44,44 @@
 ///   "RNBQKBNR",
 /// )
 /// ```
-#let position(..ranks) = (
-  type: "board-n-pieces:fen",
-  fen: ranks.pos()
-    .map(rank => {
-      let fen-rank = ""
-      let empty-count = 0
-      for square in rank {
-        if square in (" ", ".", "-") {
-          empty-count += 1
-        } else {
-          if empty-count != 0 {
-            fen-rank += str(empty-count)
-            empty-count = 0
+#let position(..ranks) = {
+  let ranks = ranks.pos()
+  if ranks.len() != 0 {
+    let file-count = ranks.at(0).clusters().len()
+    for rank in ranks {
+      assert.eq(
+        rank.clusters().len(),
+        file-count,
+        message: "the ranks of a position should all contain the same amount of files"
+      )
+    }
+  }
+  (
+    type: "board-n-pieces:fen",
+    fen: ranks
+      .map(rank => {
+        let fen-rank = ""
+        let empty-count = 0
+        for square in rank {
+          if square in (" ", ".", "-") {
+            empty-count += 1
+          } else {
+            if empty-count != 0 {
+              fen-rank += str(empty-count)
+              empty-count = 0
+            }
+            fen-rank += square
           }
-          fen-rank += square
         }
-      }
-      if empty-count != 0 {
-        fen-rank += str(empty-count)
-      }
-      fen-rank
-    })
-    .join("/")
-    + " w KQkq - 0 1",
-)
+        if empty-count != 0 {
+          fen-rank += str(empty-count)
+        }
+        fen-rank
+      })
+      .join("/")
+      + " w KQkq - 0 1",
+  )
+}
 
 
 /// Creates a position using Forsyth–Edwards Notation.
@@ -81,7 +94,6 @@
   if " " not in fen-string {
     fen-string = fen-string + " w KQkq - 0 1"
   }
-  let fen-parts = fen-string.split(" ")
   (
     type: "board-n-pieces:fen",
     fen: fen-string,
