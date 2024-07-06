@@ -252,8 +252,9 @@
 
     let length = hypot(end-file - start-file, end-rank - start-rank) * square-size
     let angle = calc.atan2(end-file - start-file, start-rank - end-rank)
-    let triangle-size = 2.5 * arrow-stroke.thickness
-    let triangle-start = hypot(triangle-size, triangle-size) / 2 + square-size / 6
+    let triangle-base = 2 * arrow-stroke.thickness
+    let triangle-height = 1.5 * arrow-stroke.thickness
+    let triangle-start = triangle-height + square-size / 6
 
     grid-elements.last() += {
       place(
@@ -275,12 +276,11 @@
         ))
       )
 
-      let triangle-size = 2.5 * arrow-stroke.thickness
       let triangle = polygon(
         fill: arrow-stroke.paint,
-        (triangle-size, triangle-size),
-        (0cm, triangle-size),
-        (triangle-size, 0cm),
+        (0pt, -triangle-base / 2),
+        (0pt, triangle-base / 2),
+        (triangle-height, 0pt),
       )
       place(
         center + horizon,
@@ -292,8 +292,8 @@
             -end-rank * square-size
               - calc.sin(angle) * triangle-start,
           rotate(
-            angle - 45deg,
-            triangle,
+            angle,
+            place(triangle),
           ),
         ),
       )
