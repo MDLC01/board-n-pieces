@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.4.0
+
+- Add the ability to draw arrows in `board`.
+
 ## Version 0.3.0
 
 - Detect moves that put the king in check as illegal, improving SAN support.
