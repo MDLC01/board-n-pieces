@@ -38,10 +38,26 @@ Alternatively, you can use the `fen` function to create a position using [Forsyt
 #board(fen("r1bk3r/p2pBpNp/n4n2/1p1NP2P/6P1/3P4/P1P1K3/q5b1 b - - 1 23"))
 ```
 
-Note that you can also specify only the first part of the FEN string:
+Note that you can specify only the first part of the FEN string:
 
 ```example
 #board(fen("r4rk1/pp2Bpbp/1qp3p1/8/2BP2b1/Q1n2N2/P4PPP/3RK2R"))
+```
+
+Also note that positions do not need to be on a standard 8×8 board:
+
+```example
+#board(position(
+  "....Q....",
+  "......Q..",
+  "........Q",
+  "...Q.....",
+  ".Q.......",
+  ".......Q.",
+  ".....Q...",
+  "..Q......",
+  "Q........",
+))
 ```
 
 
