@@ -134,6 +134,11 @@
   ///
   /// Can also be a string containing multiple whitespace-separated squares.
   highlighted-squares: (),
+  /// A list of arrows to draw.
+  ///
+  /// Must be a list of strings containg the start and end squares. For example,
+  /// `("e2 e4", "e7 e5")` or, more compactly, `("e2e4", "e7e5")`.
+  arrows: (),
 
   /// Whether to reverse the board.
   reverse: false,
@@ -154,6 +159,11 @@
   highlighted-white-square-fill: rgb("EF765F"),
   /// How to fill highlighted black squares.
   highlighted-black-square-fill: rgb("E5694E"),
+  /// How to stroke arrows.
+  arrow-stroke: stroke(
+    paint: rgb("75C534BC"),
+    thickness: 0.3cm,
+  ),
   /// How to display each piece.
   pieces: auto,
   /// The stroke displayed around the board.
@@ -168,6 +178,24 @@
   if type(highlighted-squares) == str {
     highlighted-squares = highlighted-squares.split()
   }
+
+  if type(arrows) == str {
+    arrows = (arrows, )
+  }
+  arrows = arrows.map(arrow => {
+    if arrow.len() == 4 {
+      (
+        square-coordinates(arrow.slice(0, 2)),
+        square-coordinates(arrow.slice(2, 4)),
+      )
+    } else {
+      let (start, end) = arrow.split()
+      (
+        square-coordinates(start),
+        square-coordinates(end),
+      )
+    }
+  })
 
   // Doing this saves time when loading the package.
   if pieces == auto {
@@ -207,6 +235,64 @@
   )
 
   let grid-elements = squares.flatten()
+
+  for ((start-file, start-rank), (end-file, end-rank)) in arrows {
+    let hypot(x, y) = {
+      if type(x) == length and type(y) == length {
+        return hypot(x.pt(), y.pt()) * 1pt
+      }
+      calc.sqrt(x * x + y * y)
+    }
+
+    let length = hypot(end-file - start-file, end-rank - start-rank) * square-size
+    let angle = calc.atan2(end-file - start-file, start-rank - end-rank)
+    let triangle-size = 2.5 * arrow-stroke.thickness
+    let triangle-start = hypot(triangle-size, triangle-size) / 2 + square-size / 6
+
+    grid-elements.last() += {
+      place(
+        center + horizon,
+        place(line(
+          start: (
+            (start-file - width + 1) * square-size
+              - calc.cos(angle) * arrow-stroke.thickness / 2,
+            -start-rank * square-size
+              - calc.sin(angle) * arrow-stroke.thickness / 2,
+          ),
+          end: (
+            (end-file - width + 1) * square-size
+              - calc.cos(angle) * triangle-start,
+            -end-rank * square-size
+              - calc.sin(angle) * triangle-start,
+          ),
+          stroke: arrow-stroke,
+        ))
+      )
+
+      let triangle-size = 2.5 * arrow-stroke.thickness
+      let triangle = polygon(
+        fill: arrow-stroke.paint,
+        (triangle-size, triangle-size),
+        (0cm, triangle-size),
+        (triangle-size, 0cm),
+      )
+      place(
+        center + horizon,
+        move(
+          dx:
+            (end-file - width + 1) * square-size
+              - calc.cos(angle) * triangle-start,
+          dy:
+            -end-rank * square-size
+              - calc.sin(angle) * triangle-start,
+          rotate(
+            angle - 45deg,
+            triangle,
+          ),
+        ),
+      )
+    }
+  }
 
   if display-numbers {
     let number-cell = grid.cell.with(
