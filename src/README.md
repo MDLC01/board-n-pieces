@@ -63,7 +63,7 @@ Also note that positions do not need to be on a standard 8×8 board:
 
 ## Using the `game` function
 
-The `game` function creates an array of positions from a full chess game. A game is described by a series of turns written using [standard algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). Those turns can be specified as an array of strings, or as a single string containing whitespace-separated moves.
+The `game` function creates an array of positions from a full chess game. A game is described by a series of turns written in [standard algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). Those turns can be specified as an array of strings, or as a single string containing whitespace-separated moves.
 
 ```example
 %show: pad.with(0.5cm)
@@ -83,7 +83,6 @@ You can specify an alternative starting position to the `game` function with the
 
 Similarly to the `game` function, the `pgn` function creates an array of positions. It accepts a single argument, which is a string containing [portable game notation](https://en.wikipedia.org/wiki/Portable_Game_Notation). To read a game from a PGN file, you can use this function in combination with Typst's native [`read`](https://typst.app/docs/reference/data-loading/read/) function.
 
-<!-- This is intentionally not an example, because no `game.pgn` file exists. -->
 ```typ
 #let positions = pgn(read("game.pgn"))
 ```
@@ -93,9 +92,32 @@ Note that the argument to `pgn` must describe a single game. If you have a PGN f
 
 ## Customizing a chessboard
 
-The `board` function lets you customize the appearance of the board with multiple arguments. They are described below.
+The `board` function lets you customize the appearance of the board in various ways, as illustrated in the example below.
 
-- `highlighted-squares` is a list of squares to highlight (e.g. `("d3", "d2", "e3")`). It can also be specified as a single string containing whitespace-separated squares (e.g. `"d3 d2 e3"`).
+// From https://lichess.org/study/Xf1PGrM0.
+```example
+#board(
+  fen("3k4/7R/8/2PK4/8/8/8/6r1 b - - 0 1"),
+
+  highlighted-squares: "c7 c6 h6",
+  arrows: ("d8 c8", "d8 c7", "g1 g6", "h7 h6"),
+  display-numbers: true,
+
+  white-square-fill: rgb("D2EEEA"),
+  black-square-fill: rgb("567F96"),
+  highlighted-white-square-fill: rgb("69F7E4"),
+  highlighted-black-square-fill: rgb("2BCBC6"),
+  arrow-stroke: 0.2cm + rgb("38F442DF"),
+
+  stroke: 0.8pt + black,
+)
+```
+
+Here is a list of all the available arguments:
+
+- `highlighted-squares` is a list of squares to highlight (e.g., `("d3", "d2", "e3")`). It can also be specified as a single string containing whitespace-separated squares (e.g., `"d3 d2 e3"`).
+
+- `arrows` is a list of arrows to draw (e.g., `("e2 e4", "e7 e5")`).
 
 - `reverse` is a boolean indicating whether to reverse the board, displaying it from black's point of view. This is `false` by default, meaning the board is displayed from white's point of view.
 
@@ -108,6 +130,8 @@ The `board` function lets you customize the appearance of the board with multipl
 - `white-square-fill` and `black-square-fill` indicate how squares should be filled. They can be colors, gradient or patterns.
 
 - `highlighted-white-square-fill` and `highlighted-black-square-fill` indicate how highlighted squares should be filled. For highlighted squares, this is applied instead of `white-square-fill` and `black-square-fill`.
+
+- `arrow-stroke` is the stroke to draw the arrows with.
 
 - `pieces` is a dictionary containing images representing each piece. If specified, the dictionary must contain an entry for every piece kind in the displayed position. Keys are single upper-case letters for white pieces and single lower-case letters for black pieces. The default images are taken from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). Please refer to [the section on licensing](#licensing) for information on how you can use them in your documents.
 
