@@ -130,9 +130,12 @@
 #let board(
   /// The position to display.
   position,
+
   /// A list of squares to highlight.
   ///
-  /// Can also be a string containing multiple whitespace-separated squares.
+  /// Can be specified as a list of strings containing the square names, or as a
+  /// single string containing multiple whitespace-separated squares. For
+  /// example, `("d4", "e4", "d5", "e5")` is equivalent to `"d4 e4 d5 e5"`.
   highlighted-squares: (),
   /// A list of arrows to draw.
   ///
@@ -165,6 +168,9 @@
     thickness: 0.3cm,
   ),
   /// How to display each piece.
+  ///
+  /// See README for more information (including licensing) on the default
+  /// images.
   pieces: auto,
   /// The stroke displayed around the board.
   ///
@@ -197,7 +203,7 @@
     }
   })
 
-  // Doing this saves time when loading the package.
+  // Doing this lazily to save time when loading the package.
   if pieces == auto {
     pieces = (
       P: image("assets/pw.svg", width: 100%),
