@@ -94,8 +94,8 @@ Note that the argument to `pgn` must describe a single game. If you have a PGN f
 
 The `board` function lets you customize the appearance of the board in various ways, as illustrated in the example below.
 
-// From https://lichess.org/study/Xf1PGrM0.
 ```example
+// From https://lichess.org/study/Xf1PGrM0.
 #board(
   fen("3k4/7R/8/2PK4/8/8/8/6r1 b - - 0 1"),
 
