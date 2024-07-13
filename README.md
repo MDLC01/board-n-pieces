@@ -19,4 +19,4 @@ For more information on how to use this package, take a look at the rendered REA
 
 ## License
 
-The contents of this repository are licensed under the [MIT License](LICENSE), with the exception of the chess pieces under [`src/assets/`](src/assets/). Those are licensed under the [GNU General Public License, version 2](src/assets/LICENSE). They were initially published on Wikimedia by [Cburnett](https://en.wikipedia.org/wiki/User:Cburnett), and later modified by other contributors.
+Unless otherwise stated, the contents of this repository are licensed under the [MIT License](LICENSE), with the exception of the chess pieces under [`src/assets/`](src/assets/). Those are licensed under the [GNU General Public License, version 2](src/assets/LICENSE). They were initially published on Wikimedia by [Cburnett](https://en.wikipedia.org/wiki/User:Cburnett), and later modified by other contributors.
