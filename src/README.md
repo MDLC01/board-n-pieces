@@ -90,6 +90,27 @@ Similarly to the `game` function, the `pgn` function creates an array of positio
 Note that the argument to `pgn` must describe a single game. If you have a PGN file containing multiple games, you will need to split them using other means.
 
 
+## Using non-standard chess pieces
+
+The `board` function's `pieces` argument lets you specify how to display each piece by mapping each piece character to some content. You can use this feature to display non-standard chess pieces:
+
+```example
+%set text(size: 0.8cm, font: "Noto Sans Symbols 2")
+#board(
+  fen("g7/5g2/8/8/8/8/p6g/k1K4G"),
+  pieces: (
+    // We use symbols for the example.
+    // In practice, you should import your own images.
+    g: chess-sym.queen.black.b,
+    p: chess-sym.pawn.black,
+    k: chess-sym.king.black,
+    K: chess-sym.king.white,
+    G: chess-sym.queen.white.b,
+  ),
+)
+```
+
+
 ## Customizing a chessboard
 
 The `board` function lets you customize the appearance of the board in various ways, as illustrated in the example below.
