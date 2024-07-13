@@ -140,7 +140,12 @@ Here is a list of all the available arguments:
 
 ## Chess symbols
 
-This package also exports chess-related symbols under `chess-sym.{pawn,knight,bishop,rook,queen,king}.{filled,stroked,white,black}`. `filled` and `black` variants are equivalent, and `stroked` and `white` as well.
+This package also exports chess symbols for all Unicode chess-related codepoints under the `chess-sym` submodule. Standard chess pieces are available as `chess-sym.{pawn,knight,bishop,rook,queen,king}.{white,black,neutral}`. Alternatively, you can use `stroked` and `filled` instead of, respectively, `white` and `black`. They can be rotated rightward, downward, and leftward respectively with with `.r`, `.b`, and `.l`. Chinese chess pieces are also available as `chess-sym.{soldier,cannon,chariot,horse,elephant,mandarin,general}.{red,black}`. Similarly, you can use `stroked` and `filled` as alternatives to, respectively, `red` and `black`.
+
+```example
+%show: pad.with(0.5cm)
+The best move in this position is #chess-sym.knight.white;c6.
+```
 
 
 ## Licensing
