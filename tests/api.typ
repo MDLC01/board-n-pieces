@@ -106,7 +106,6 @@
   stroke: (bottom: none, rest: green),
 )
 
-
 ---
 #bnp.board(
   bnp.starting-position,
@@ -114,7 +113,6 @@
   arrows: ("e2 e4", "e7e5", "d1h5"),
   display-numbers: true,
 )
-
 
 ---
 #bnp.board(
@@ -125,4 +123,22 @@
     "g1 f3", "f3 h4",
   ),
   display-numbers: true,
+)
+
+---
+// From https://lichess.org/study/Xf1PGrM0.
+#bnp.board(
+  bnp.fen("3k4/7R/8/2PK4/8/8/8/6r1 b - - 0 1"),
+
+  highlighted-squares: "c7 c6 h6",
+  arrows: ("d8 c8", "d8 c7", "g1 g6", "h7 h6"),
+  display-numbers: true,
+
+  white-square-fill: rgb("D2EEEA"),
+  black-square-fill: rgb("567F96"),
+  highlighted-white-square-fill: rgb("69F7E4"),
+  highlighted-black-square-fill: rgb("2BCBC6"),
+  arrow-stroke: 0.2cm + rgb("38F442DF"),
+
+  stroke: 0.8pt + black,
 )
