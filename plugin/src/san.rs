@@ -445,9 +445,6 @@ impl AlgebraicTurn {
                 capture,
                 promotion,
             } => {
-                // FIXME: When a turn is disambiguated using the rank of departure, this means it cannot be
-                //  disambiguated using the departure file, which is an additional information that we don't
-                //  currently take into account.
                 let mut possible_new_positions = valid_moves(initial_position, piece)
                     .into_iter()
                     // Filter moves that do not match the algebraic notation.
