@@ -142,3 +142,15 @@
 
   stroke: 0.8pt + black,
 )
+
+---
+#bnp.board(
+  bnp.fen("U"),
+  pieces: (
+    // From https://commons.wikimedia.org/wiki/File:Chess_Ult45.svg.
+    // Knight by Cburnett <https://en.wikipedia.org/wiki/User:Cburnett>.
+    // Unicorn by Francois-Pier <https://commons.wikimedia.org/wiki/User:Francois-Pier>.
+    // Licensed under the GNU General Public License, version 2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>.
+    U: image("assets/unicorn.svg"),
+  )
+)
