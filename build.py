@@ -67,6 +67,9 @@ def build_readme():
 
     EXAMPLES_DIR = Path('examples/')
 
+    def example_path(n):
+        return EXAMPLES_DIR.joinpath(f'example-{n}.svg')
+
     final_lines = []
 
     with open(LIBRARY_DIR.joinpath(README)) as f:
@@ -95,7 +98,7 @@ def build_readme():
             example_source.append(f'#page[\n{'\n'.join(example)}\n];')
             final_lines.append(line)
             final_lines.append('')
-            final_lines.append(f'![image](examples/example-{example_count}.svg)')
+            final_lines.append(f'![image]({example_path(example_count).as_posix()})')
         elif is_example:
             if line.startswith('%'):
                 example.append('#' + line[1:])
@@ -111,7 +114,7 @@ def build_readme():
 
     TARGET_DIR.joinpath(EXAMPLES_DIR).mkdir(parents=True)
     subprocess.run(
-        ['typst', 'compile', '-', str(EXAMPLES_DIR.joinpath('example-{n}.svg'))],
+        ['typst', 'compile', '-', str(example_path('{n}'))],
         input='\n'.join(example_source),
         encoding='utf-8',
         cwd=TARGET_DIR,
