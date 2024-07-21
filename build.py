@@ -79,7 +79,7 @@ def build_readme():
 
     example_source = [
         '#import "lib.typ": *;',
-        '#set page(width: auto, height: auto, margin: 0cm, fill: rgb("#fdfdfd"));',
+        '#set page(width: auto, height: auto, margin: 0cm, fill: none);',
     ]
     example_count = 0
     example = []
