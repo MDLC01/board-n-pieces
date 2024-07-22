@@ -181,8 +181,15 @@
 
   position = resolve-position(position)
 
-  if type(highlighted-squares) == str {
-    highlighted-squares = highlighted-squares.split()
+  let height = position.board.len()
+  assert(height > 0, message: "board cannot be empty")
+  let width = position.board.at(0).len()
+  assert(width > 0, message: "board cannot be empty")
+  for rank in position.board {
+    assert.eq(
+      rank.len(), width,
+      message: "all ranks of a board must have the same width",
+    )
   }
 
   if type(arrows) == str {
@@ -222,11 +229,6 @@
   }
 
   let stroke = stroke-sides(stroke)
-
-  let height = position.board.len()
-  assert(height > 0, message: "board cannot be empty")
-  let width = position.board.at(0).len()
-  assert(width > 0, message: "board cannot be empty")
 
   let squares = (
     position.board
