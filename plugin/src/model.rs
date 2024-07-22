@@ -59,7 +59,6 @@ impl File {
 }
 
 impl Finite for File {
-    #[allow(refining_impl_trait)]
     fn values() -> [Self; 8] {
         [
             Self::A,
@@ -168,7 +167,6 @@ impl Rank {
 }
 
 impl Finite for Rank {
-    #[allow(refining_impl_trait)]
     fn values() -> [Self; 8] {
         [
             Self::One,

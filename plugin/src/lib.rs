@@ -1,3 +1,5 @@
+#![allow(refining_impl_trait)]
+
 mod fen;
 mod model;
 mod pgn;
@@ -43,7 +45,7 @@ pub fn replay_game(starting_position: &[u8], turns: &[u8]) -> Result<Vec<u8>> {
 #[wasm_func]
 pub fn game_from_pgn(pgn: &[u8]) -> Result<Vec<u8>> {
     let Ok(pgn) = std::str::from_utf8(pgn) else {
-        // The specification actually requires that PGN used ASCII, but we allow UTF-8 because this
+        // The specification actually requires that PGN uses ASCII, but we allow UTF-8 because this
         // is today's world standard.
         Err("internal error: PGN should be a valid UTF-8 string")?
     };
