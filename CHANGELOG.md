@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 0.5.0
+
+- Add symbols for all Unicode chess-related codepoints.
+
+- Change the signature of the `board` function.
+    - Rename argument `highlighted-squares` to `marked-squares`.
+    - Remove arguments `highlighted-white-square-fill` and `highlighted-black-square-fill`.
+    - Add argument `marking-color`, together with `marked-white-square-background` and `marked-black-square-background`.
+    - Support passing a length as `arrow-stroke`.
+
+- Fix arrows not being displayed properly on reversed boards.
+
 ## Version 0.4.0
 
 - Add the ability to draw arrows in `board`.
