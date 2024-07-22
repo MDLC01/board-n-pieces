@@ -173,3 +173,14 @@
   ),
   marked-white-square-background: rect(fill: blue),
 )
+
+---
+#bnp.board(
+  bnp.starting-position,
+  arrows: (
+    "c3 d4", "e3 d4", "c5 d4", "e5 d4", "d3 d4",
+    "g4 g5", "f5 g5", "h5 g5", "g6 g5",
+    "g1 f3", "f3 h4",
+  ),
+  reverse: true,
+)

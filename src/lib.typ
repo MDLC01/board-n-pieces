@@ -286,13 +286,20 @@
       calc.sqrt(x * x + y * y)
     }
 
+    if reverse {
+      start-file = width - start-file - 1
+      start-rank = height - start-rank - 1
+      end-file = width - end-file - 1
+      end-rank = height - end-rank - 1
+    }
+
     let length = hypot(end-file - start-file, end-rank - start-rank) * square-size
     let angle = calc.atan2(end-file - start-file, start-rank - end-rank)
     let triangle-base = 2 * arrow-stroke.thickness
     let triangle-height = 1.5 * arrow-stroke.thickness
     let triangle-start = triangle-height + square-size / 6
 
-    grid-elements.last() += {
+    let arrow = {
       place(
         center + horizon,
         place(line(
@@ -333,6 +340,12 @@
           ),
         ),
       )
+    }
+
+    if reverse {
+      grid-elements.first() += arrow
+    } else {
+      grid-elements.last() += arrow
     }
   }
 
