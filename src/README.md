@@ -120,15 +120,14 @@ The `board` function lets you customize the appearance of the board in various w
 #board(
   fen("3k4/7R/8/2PK4/8/8/8/6r1 b - - 0 1"),
 
-  highlighted-squares: "c7 c6 h6",
+  marked-squares: "c7 c6 h6",
   arrows: ("d8 c8", "d8 c7", "g1 g6", "h7 h6"),
   display-numbers: true,
 
-  white-square-fill: rgb("D2EEEA"),
-  black-square-fill: rgb("567F96"),
-  highlighted-white-square-fill: rgb("69F7E4"),
-  highlighted-black-square-fill: rgb("2BCBC6"),
-  arrow-stroke: 0.2cm + rgb("38F442DF"),
+  white-square-fill: rgb("#d2eeea"),
+  black-square-fill: rgb("#567f96"),
+  marking-color: rgb("#2bcbC6"),
+  arrow-stroke: 0.2cm + rgb("#38f442df"),
 
   stroke: 0.8pt + black,
 )
@@ -136,7 +135,7 @@ The `board` function lets you customize the appearance of the board in various w
 
 Here is a list of all the available arguments:
 
-- `highlighted-squares` is a list of squares to highlight (e.g., `("d3", "d2", "e3")`). It can also be specified as a single string containing whitespace-separated squares (e.g., `"d3 d2 e3"`).
+- `marked-squares` is a list of squares to mark (e.g., `("d3", "d2", "e3")`). It can also be specified as a single string containing whitespace-separated squares (e.g., `"d3 d2 e3"`).
 
 - `arrows` is a list of arrows to draw (e.g., `("e2 e4", "e7 e5")`).
 
@@ -150,9 +149,11 @@ Here is a list of all the available arguments:
 
 - `white-square-fill` and `black-square-fill` indicate how squares should be filled. They can be colors, gradient or patterns.
 
-- `highlighted-white-square-fill` and `highlighted-black-square-fill` indicate how highlighted squares should be filled. For highlighted squares, this is applied instead of `white-square-fill` and `black-square-fill`.
+- `marking-color` is the color to use for markings (marked squares and arrows).
 
-- `arrow-stroke` is the stroke to draw the arrows with.
+- `marked-white-square-background` and `marked-black-square-background` define the content to display in the background of marked squares. By default, this is a circle using the `marking-color`.
+
+- `arrow-stroke` is the stroke to draw the arrows with. If only a length is given, `marking-color` is used. Alternatively, a stroke can be passed to specify a different color.
 
 - `pieces` is a dictionary containing images representing each piece. If specified, the dictionary must contain an entry for every piece kind in the displayed position. Keys are single upper-case letters for white pieces and single lower-case letters for black pieces. The default images are taken from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). Please refer to [the section on licensing](#licensing) for information on how you can use them in your documents.
 

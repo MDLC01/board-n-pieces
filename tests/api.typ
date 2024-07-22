@@ -28,13 +28,14 @@
 ---
 #bnp.board(
   bnp.starting-position,
-  highlighted-squares: ("e4", "d4", "e5", "d5", "f4"),
+  marked-squares: ("e4", "d4", "e5", "d5", "f4"),
 )
 
 ---
 #bnp.board(
   bnp.starting-position,
-  highlighted-squares: "e4 d4 e5 d5 f4",
+  marked-squares: "e4 d4 e5 d5 f4",
+  reverse: true,
 )
 
 ---
@@ -109,7 +110,7 @@
 ---
 #bnp.board(
   bnp.starting-position,
-  highlighted-squares: "h5",
+  marked-squares: "h5",
   arrows: ("e2 e4", "e7e5", "d1h5"),
   display-numbers: true,
 )
@@ -130,15 +131,14 @@
 #bnp.board(
   bnp.fen("3k4/7R/8/2PK4/8/8/8/6r1 b - - 0 1"),
 
-  highlighted-squares: "c7 c6 h6",
+  marked-squares: "c7 c6 h6",
   arrows: ("d8 c8", "d8 c7", "g1 g6", "h7 h6"),
   display-numbers: true,
 
   white-square-fill: rgb("D2EEEA"),
   black-square-fill: rgb("567F96"),
-  highlighted-white-square-fill: rgb("69F7E4"),
-  highlighted-black-square-fill: rgb("2BCBC6"),
-  arrow-stroke: 0.2cm + rgb("38F442DF"),
+  marking-color: rgb("#2bcbc6"),
+  arrow-stroke: 0.2cm + rgb("#38f442df"),
 
   stroke: 0.8pt + black,
 )
@@ -152,8 +152,24 @@
     // Unicorn by Francois-Pier <https://commons.wikimedia.org/wiki/User:Francois-Pier>.
     // Licensed under the GNU General Public License, version 2 <https://www.gnu.org/licenses/old-licenses/gpl-2.0.html>.
     U: image("assets/unicorn.svg"),
-  )
+  ),
 )
 
 ---
 #include "symbols.typ"
+
+---
+#bnp.board(
+  bnp.starting-position,
+  marked-squares: (
+    "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+    "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+    "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+    "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+    "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+    "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+    "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+    "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
+  ),
+  marked-white-square-background: rect(fill: blue),
+)

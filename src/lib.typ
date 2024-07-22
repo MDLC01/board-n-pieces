@@ -131,12 +131,12 @@
   /// The position to display.
   position,
 
-  /// A list of squares to highlight.
+  /// A list of squares to mark.
   ///
   /// Can be specified as a list of strings containing the square names, or as a
   /// single string containing multiple whitespace-separated squares. For
   /// example, `("d4", "e4", "d5", "e5")` is equivalent to `"d4 e4 d5 e5"`.
-  highlighted-squares: (),
+  marked-squares: (),
   /// A list of arrows to draw.
   ///
   /// Must be a list of strings containg the start and end squares. For example,
@@ -155,18 +155,17 @@
   /// The size of each square.
   square-size: 1cm,
   /// How to fill white squares.
-  white-square-fill: rgb("FFCE9E"),
+  white-square-fill: rgb("#ffce9e"),
   /// How to fill black squares.
-  black-square-fill: rgb("D18B47"),
-  /// How to fill highlighted white squares.
-  highlighted-white-square-fill: rgb("EF765F"),
-  /// How to fill highlighted black squares.
-  highlighted-black-square-fill: rgb("E5694E"),
+  black-square-fill: rgb("#d18b47"),
+  /// The color to use for markings on the board.
+  marking-color: rgb("#ff4136a5"),
+  /// Background to add behind white marked squares.
+  marked-white-square-background: auto,
+  /// Background to add behind black marked squares.
+  marked-black-square-background: auto,
   /// How to stroke arrows.
-  arrow-stroke: stroke(
-    paint: rgb("75C534BC"),
-    thickness: 0.3cm,
-  ),
+  arrow-stroke: 0.2cm,
   /// How to display each piece.
   ///
   /// See README for more information (including licensing) on the default
@@ -192,6 +191,11 @@
     )
   }
 
+  if type(marked-squares) == str {
+    marked-squares = marked-squares.split()
+  }
+  let marked-squares = marked-squares.map(square-coordinates)
+
   if type(arrows) == str {
     arrows = (arrows, )
   }
@@ -209,6 +213,24 @@
       )
     }
   })
+
+  let default-square-mark = {
+    let margin = 0.05cm
+    let thickness = 0.15cm
+    circle(
+      width: 100% - thickness - 2 * margin,
+      stroke: thickness + marking-color,
+    )
+  }
+  if marked-white-square-background == auto {
+    marked-white-square-background = default-square-mark
+  }
+  if marked-black-square-background == auto {
+    marked-black-square-background = default-square-mark
+  }
+  if type(arrow-stroke) == length {
+    arrow-stroke = arrow-stroke + marking-color
+  }
 
   // Doing this lazily to save time when loading the package.
   if pieces == auto {
@@ -230,17 +252,29 @@
 
   let stroke = stroke-sides(stroke)
 
-  let squares = (
-    position.board
-      .map(rank => {
-        rank.map(square => {
-          if square != none {
-            pieces.at(square)
-          }
-        })
+  let squares = position.board
+    .enumerate()
+    .map(((j, rank)) => {
+      rank.enumerate().map(((i, square)) => {
+        if (i, j) in marked-squares {
+          show: place
+          set align(center + horizon)
+          block(
+            width: square-size,
+            height: square-size,
+            if calc.odd(i + j) {
+              marked-white-square-background
+            } else {
+              marked-black-square-background
+            }
+          )
+        }
+        if square != none {
+          pieces.at(square)
+        }
       })
-      .rev()
-  )
+    })
+    .rev()
 
   let grid-elements = squares.flatten()
 
@@ -377,17 +411,12 @@
     ))
   }
 
-  highlighted-squares = highlighted-squares.map(s => {
-    let (x, y) = square-coordinates(s)
-    if reverse {
-      (width - x - 1, y)
-    } else {
-      (x, height - y - 1)
-    }
-  })
-
   show: block.with(breakable: false)
   set text(dir: ltr)
+  set grid.cell(
+    inset: 0pt,
+    align: center + horizon,
+  )
   grid(
     fill: (x, y) => {
       if display-numbers {
@@ -398,17 +427,9 @@
         }
       }
       if calc.even(x + y) {
-        if (x, y) in highlighted-squares {
-          highlighted-white-square-fill
-        } else {
-          white-square-fill
-        }
+        white-square-fill
       } else {
-        if (x, y) in highlighted-squares {
-          highlighted-black-square-fill
-        } else {
-          black-square-fill
-        }
+        black-square-fill
       }
     },
 
@@ -423,8 +444,6 @@
     } else {
       (square-size, ) * height
     },
-
-    align: center + horizon,
 
     ..grid-elements,
   )
