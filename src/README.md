@@ -4,7 +4,7 @@
 
 # Board & Pieces
 
-Display chessboards in Typst.
+This package lets you display and customize chessboards. It supports FEN and PGN and can display different kinds of markings such as arrows. It also adds names for various chess-related symbols.
 
 
 ## Displaying chessboards
