@@ -92,7 +92,7 @@ Note that the argument to `pgn` must describe a single game. If you have a PGN f
 
 ## Using non-standard chess pieces
 
-The `board` function's `pieces` argument lets you specify how to display each piece by mapping each piece character to some content. You can use this feature to display non-standard chess pieces:
+The `board` function's `pieces` argument lets you specify how to display pieces by mapping each piece character to some content. You can use this feature to display non-standard chess pieces:
 
 ```example
 %set text(size: 0.8cm, font: "Noto Sans Symbols 2")
@@ -147,7 +147,7 @@ Here is a list of all the available arguments:
 
 - `square-size` is a length describing the size of each square. By default, this is `1cm`.
 
-- `white-square-fill` and `black-square-fill` indicate how squares should be filled. They can be colors, gradient or patterns.
+- `white-square-fill` and `black-square-fill` indicate how squares should be filled. They can be colors, gradients or patterns.
 
 - `marking-color` is the color to use for markings (marked squares and arrows).
 
@@ -172,4 +172,4 @@ The best move in this position is #chess-sym.knight.white;c6.
 
 ## Licensing
 
-The default images for chess pieces used by the `board` function come from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). They are all licensed the [GNU General Public License, version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) by their original author: [Cburnett](https://en.wikipedia.org/wiki/User:Cburnett).
+The default images for chess pieces used by the `board` function come from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). They are all licensed under the [GNU General Public License, version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) by their original author: [Cburnett](https://en.wikipedia.org/wiki/User:Cburnett).
