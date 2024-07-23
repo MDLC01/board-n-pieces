@@ -139,7 +139,7 @@ Here is a list of all the available arguments:
 
 - `arrows` is a list of arrows to draw (e.g., `("e2 e4", "e7 e5")`).
 
-- `reverse` is a boolean indicating whether to reverse the board, displaying it from black's point of view. This is `false` by default, meaning the board is displayed from white's point of view.
+- `reverse` is a boolean indicating whether to reverse the board, displaying it from Black's point of view. This is `false` by default, meaning the board is displayed from White's point of view.
 
 - `display-numbers` is a boolean indicating whether ranks and files should be numbered. This is `false` by default.
 

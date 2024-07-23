@@ -143,7 +143,8 @@
   /// `("e2 e4", "e7 e5")` or, more compactly, `("e2e4", "e7e5")`.
   arrows: (),
 
-  /// Whether to reverse the board.
+  /// Whether to reverse the board and display it from Black's point of view
+  /// instead of White's.
   reverse: false,
   /// Whether to display file and rank numbers.
   display-numbers: false,
