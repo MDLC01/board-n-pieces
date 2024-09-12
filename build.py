@@ -72,7 +72,7 @@ def build_readme():
 
     final_lines = []
 
-    with open(LIBRARY_DIR.joinpath(README)) as f:
+    with open(LIBRARY_DIR.joinpath(README), encoding='UTF-8') as f:
         initial_readme = f.read()
 
     # Build examples
@@ -116,14 +116,14 @@ def build_readme():
     subprocess.run(
         ['typst', 'compile', '-', str(example_path('{n}'))],
         input='\n'.join(example_source),
-        encoding='utf-8',
+        encoding='UTF-8',
         cwd=TARGET_DIR,
         check=True,
     )
 
     # Add changelog
 
-    with open(CHANGELOG) as f:
+    with open(CHANGELOG, encoding='UTF-8') as f:
         initial_changelog = f.read()
 
     final_lines.append('')
@@ -136,7 +136,7 @@ def build_readme():
 
     # Write README
 
-    with open(TARGET_DIR.joinpath(README), 'w') as f:
+    with open(TARGET_DIR.joinpath(README), 'w', encoding='UTF-8') as f:
         f.write('\n'.join(final_lines))
 
 
