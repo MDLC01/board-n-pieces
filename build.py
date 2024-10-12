@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 
+TYPST = 'typst'
 LIBRARY_DIR = Path('src/')
 PLUGIN_DIR = Path('plugin/')
 TARGET_DIR = Path('target/')
@@ -114,7 +115,7 @@ def build_readme():
 
     TARGET_DIR.joinpath(EXAMPLES_DIR).mkdir(parents=True)
     subprocess.run(
-        ['typst', 'compile', '-', str(example_path('{n}'))],
+        [TYPST, 'compile', '-', str(example_path('{n}'))],
         input='\n'.join(example_source),
         encoding='UTF-8',
         cwd=TARGET_DIR,
@@ -150,7 +151,7 @@ def test():
 
     subprocess.run(
         [
-            'typst', 'compile',
+            TYPST, 'compile',
             str(TEST_DIR.joinpath('tests.typ')),
             str(REF_DIR.joinpath('test-{n}.png')),
             '--input', f'lib={os.path.relpath(LIB_ROOT, TEST_DIR)}',
