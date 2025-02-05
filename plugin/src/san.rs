@@ -1,5 +1,5 @@
 use crate::model::{Color, File, Piece, PieceKind, Position, Rank, Square, SquareContent};
-use crate::utils::{CharExt, Finite, Name, OptionExt, StrExt};
+use crate::utils::{CharExt, Finite, Name, StrExt};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use std::{fmt, iter};
