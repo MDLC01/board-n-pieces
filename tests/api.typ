@@ -185,3 +185,14 @@
   ),
   reverse: true,
 )
+
+---
+#bnp.board(
+  bnp.fen("8/8/8/8/8/8/8/8"),
+  marked-squares: (
+    a1: bnp.marks.circle(paint: blue, thickness: 0.01cm, margin: 0.2cm),
+    a2: bnp.marks.cross(paint: green, thickness: 0.1cm, margin: 0.2cm),
+    a3: bnp.marks.fill(bnp.marks.default-color),
+    a4: bnp.marks.circle(paint: blue, thickness: 0.4cm, margin: 0cm),
+  ),
+)
