@@ -68,15 +68,21 @@
 }
 
 /// Returns the index of a file.
-#let file-index(file) = file.to-unicode() - "a".to-unicode()
+#let file-index(f) = f.to-unicode() - "a".to-unicode()
 
 /// Returns the index of a rank.
 #let rank-index(r) = int(r) - 1
 
-/// Returns the coordinate of a square given a square name.
+/// Returns the coordinates of a square given a square name.
 #let square-coordinates(s) = {
   let (f, r) = s.clusters()
   (file-index(f), rank-index(r))
+}
+
+/// Returns the name of a square given its coordinates.
+#let square-name(s) = {
+  let (f, r) = s
+  str.from-unicode(f + "a".to-unicode()) + str(r + 1)
 }
 
 #let stroke-sides(arg) = {

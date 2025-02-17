@@ -124,6 +124,10 @@
 }
 
 
+/// Marks for squares.
+#import "marks.typ"
+
+
 /// Displays a position on a chess board.
 ///
 /// A position can be created using the `position` function.
@@ -131,12 +135,24 @@
   /// The position to display.
   position,
 
-  /// A list of squares to mark.
+  /// Squares to mark.
   ///
   /// Can be specified as a list of strings containing the square names, or as a
   /// single string containing multiple whitespace-separated squares. For
   /// example, `("d4", "e4", "d5", "e5")` is equivalent to `"d4 e4 d5 e5"`.
-  marked-squares: (),
+  ///
+  /// Alternatively, this can be a dictionary whose keys are squares, and values
+  /// are marks to use. For example:
+  /// ```
+  /// (
+  ///   "d4 e4": marks.circle(paint: rgb("#2bcbc6")),
+  ///   "d5": auto,
+  /// )
+  /// ```
+  ///
+  /// The marks default to `auto`, with which `white-mark` and `black-mark` are
+  /// used appropriately.
+  marked-squares: (:),
   /// A list of arrows to draw.
   ///
   /// Must be a list of strings containg the start and end squares. For example,
@@ -159,12 +175,14 @@
   white-square-fill: rgb("#ffce9e"),
   /// How to fill black squares.
   black-square-fill: rgb("#d18b47"),
-  /// The color to use for markings on the board.
-  marking-color: rgb("#ff4136a5"),
-  /// Background to add behind white marked squares.
-  marked-white-square-background: auto,
-  /// Background to add behind black marked squares.
-  marked-black-square-background: auto,
+  /// The mark to use by default for white squares.
+  ///
+  /// In case explicit marks are specified in `marked-squares`, this is ignored.
+  white-mark: marks.circle(),
+  /// The mark to use by default for black squares.
+  ///
+  /// In case explicit marks are specified in `marked-squares`, this is ignored.
+  black-mark: marks.circle(),
   /// How to stroke arrows.
   arrow-stroke: 0.2cm,
   /// How to display each piece.
@@ -177,7 +195,12 @@
   /// Use the same structure as `rect.stroke`.
   stroke: none,
 ) = {
-  import "internals.typ": resolve-position, stroke-sides, square-coordinates
+  import "internals.typ": (
+    resolve-position,
+    stroke-sides,
+    square-coordinates,
+    square-name,
+  )
 
   position = resolve-position(position)
 
@@ -187,15 +210,32 @@
   assert(width > 0, message: "board cannot be empty")
   for rank in position.board {
     assert.eq(
-      rank.len(), width,
+      rank.len(),
+      width,
       message: "all ranks of a board must have the same width",
     )
   }
 
+  if type(marked-squares) == dictionary {
+    // Dictionary with multiple squares as keys to dictionary with single squares
+    // as keys.
+    marked-squares = marked-squares
+      .pairs()
+      .map(((ss, m)) => ss.split().map(s => (s, m)))
+      .sum(default: ())
+      .to-dict()
+  }
   if type(marked-squares) == str {
     marked-squares = marked-squares.split()
   }
-  let marked-squares = marked-squares.map(square-coordinates)
+  if type(marked-squares) == array {
+    marked-squares = marked-squares.map(s => (s, auto)).to-dict()
+  }
+  assert.eq(
+    type(marked-squares),
+    dictionary,
+    message: "`marked-squares` should be a string, array, or dictionary",
+  )
 
   if type(arrows) == str {
     arrows = (arrows, )
@@ -215,22 +255,8 @@
     }
   })
 
-  let default-square-mark = {
-    let margin = 0.05cm
-    let thickness = 0.15cm
-    circle(
-      width: 100% - thickness - 2 * margin,
-      stroke: thickness + marking-color,
-    )
-  }
-  if marked-white-square-background == auto {
-    marked-white-square-background = default-square-mark
-  }
-  if marked-black-square-background == auto {
-    marked-black-square-background = default-square-mark
-  }
   if type(arrow-stroke) == length {
-    arrow-stroke = arrow-stroke + marking-color
+    arrow-stroke = arrow-stroke + marks.default-color
   }
 
   // Doing this lazily to save time when loading the package.
@@ -257,18 +283,19 @@
     .enumerate()
     .map(((j, rank)) => {
       rank.enumerate().map(((i, square)) => {
-        if (i, j) in marked-squares {
+        let s = square-name((i, j))
+        if s in marked-squares {
+          let mark = marked-squares.at(s)
+          if mark == auto {
+            if calc.odd(i + j) {
+              mark = white-mark
+            } else {
+              mark = black-mark
+            }
+          }
           show: place
           set align(center + horizon)
-          block(
-            width: square-size,
-            height: square-size,
-            if calc.odd(i + j) {
-              marked-white-square-background
-            } else {
-              marked-black-square-background
-            }
-          )
+          block(width: square-size, height: square-size, mark)
         }
         if square != none {
           pieces.at(square)

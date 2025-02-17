@@ -137,7 +137,8 @@
 
   white-square-fill: rgb("D2EEEA"),
   black-square-fill: rgb("567F96"),
-  marking-color: rgb("#2bcbc6"),
+  white-mark: bnp.marks.circle(paint: rgb("#2bcbc6")),
+  black-mark: bnp.marks.circle(paint: rgb("#2bcbc6")),
   arrow-stroke: 0.2cm + rgb("#38f442df"),
 
   stroke: 0.8pt + black,
@@ -171,7 +172,7 @@
     "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
     "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
   ),
-  marked-white-square-background: rect(fill: blue),
+  white-mark: rect(fill: blue),
 )
 
 ---
