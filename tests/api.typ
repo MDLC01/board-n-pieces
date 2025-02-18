@@ -195,4 +195,8 @@
     a3: bnp.marks.fill(bnp.marks.default-color),
     a4: bnp.marks.circle(paint: blue, thickness: 0.4cm, margin: 0cm),
   ),
+
+  arrows: "a1 a8",
+  arrow-fill: tiling(text(size: 6pt)[up]),
+  arrow-thickness: 25%,
 )
