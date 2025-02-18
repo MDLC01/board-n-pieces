@@ -139,7 +139,7 @@
   black-square-fill: rgb("567F96"),
   white-mark: bnp.marks.circle(paint: rgb("#2bcbc6")),
   black-mark: bnp.marks.circle(paint: rgb("#2bcbc6")),
-  arrow-stroke: 0.2cm + rgb("#38f442df"),
+  arrow-fill: rgb("#38f442df"),
 
   stroke: 0.8pt + black,
 )

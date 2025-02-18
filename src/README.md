@@ -131,7 +131,8 @@ The `board` function lets you customize the appearance of the board in various w
   black-square-fill: rgb("#567f96"),
   white-mark: marks.cross(paint: rgb("#2bcbC6")),
   black-mark: marks.cross(paint: rgb("#2bcbC6")),
-  arrow-stroke: 0.2cm + rgb("#38f442df"),
+  arrow-fill: rgb("#38f442df"),
+  arrow-thickness: 0.25cm,
 
   stroke: 0.8pt + black,
 )
@@ -155,7 +156,7 @@ Here is a list of all the available arguments:
 
 - `white-mark` and `black-mark` are the marks to use by default for the corresponding squares.
 
-- `arrow-stroke` is the stroke to draw the arrows with. If only a length is given, `marking-color` is used. Alternatively, a stroke can be passed to specify a different color.
+- `arrow-fill` and `arrow-thickness` describe how to draw the arrows.
 
 - `pieces` is a dictionary containing images representing each piece. If specified, the dictionary must contain an entry for every piece kind in the displayed position. Keys are single upper-case letters for white pieces and single lower-case letters for black pieces. The default images are taken from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). Please refer to [the section on licensing](#licensing) for information on how you can use them in your documents.
 

@@ -183,8 +183,12 @@
   ///
   /// In case explicit marks are specified in `marked-squares`, this is ignored.
   black-mark: marks.circle(),
-  /// How to stroke arrows.
-  arrow-stroke: 0.2cm,
+  /// How to fill arrows.
+  arrow-fill: marks.default-color,
+  /// The thickness of arrows.
+  ///
+  /// Can be expressed as a percentage of the square size.
+  arrow-thickness: 20%,
   /// How to display each piece.
   ///
   /// See README for more information (including licensing) on the default
@@ -197,9 +201,9 @@
 ) = {
   import "internals.typ": (
     resolve-position,
-    stroke-sides,
     square-coordinates,
     square-name,
+    stroke-sides,
   )
 
   position = resolve-position(position)
@@ -255,9 +259,8 @@
     }
   })
 
-  if type(arrow-stroke) == length {
-    arrow-stroke = arrow-stroke + marks.default-color
-  }
+  arrow-thickness = arrow-thickness + 0% + 0pt
+  arrow-thickness = arrow-thickness.ratio * square-size + arrow-thickness.length
 
   // Doing this lazily to save time when loading the package.
   if pieces == auto {
@@ -307,13 +310,6 @@
   let grid-elements = squares.flatten()
 
   for ((start-file, start-rank), (end-file, end-rank)) in arrows {
-    let hypot(x, y) = {
-      if type(x) == length and type(y) == length {
-        return hypot(x.pt(), y.pt()) * 1pt
-      }
-      calc.sqrt(x * x + y * y)
-    }
-
     if reverse {
       start-file = width - start-file - 1
       start-rank = height - start-rank - 1
@@ -321,52 +317,73 @@
       end-rank = height - end-rank - 1
     }
 
-    let length = hypot(end-file - start-file, end-rank - start-rank) * square-size
     let angle = calc.atan2(end-file - start-file, start-rank - end-rank)
-    let triangle-base = 2 * arrow-stroke.thickness
-    let triangle-height = 1.5 * arrow-stroke.thickness
-    let triangle-start = triangle-height + square-size / 6
+    let head-thickness = 2 * arrow-thickness
+    let head-length = 1.5 * arrow-thickness
+    let tip = square-size / 6
 
     let arrow = {
-      place(
-        center + horizon,
-        place(line(
-          start: (
-            (start-file - width + 1) * square-size
-              - calc.cos(angle) * arrow-stroke.thickness / 2,
-            -start-rank * square-size
-              - calc.sin(angle) * arrow-stroke.thickness / 2,
-          ),
-          end: (
-            (end-file - width + 1) * square-size
-              - calc.cos(angle) * triangle-start,
-            -end-rank * square-size
-              - calc.sin(angle) * triangle-start,
-          ),
-          stroke: arrow-stroke,
-        ))
-      )
+      // Arrows are all placed in the bottom right square.
+      show: place.with(center + horizon)
+      show: place
 
-      let triangle = polygon(
-        fill: arrow-stroke.paint,
-        (0pt, -triangle-base / 2),
-        (0pt, triangle-base / 2),
-        (triangle-height, 0pt),
-      )
-      place(
-        center + horizon,
-        move(
-          dx:
-            (end-file - width + 1) * square-size
-              - calc.cos(angle) * triangle-start,
-          dy:
-            -end-rank * square-size
-              - calc.sin(angle) * triangle-start,
-          rotate(
-            angle,
-            place(triangle),
-          ),
-        ),
+      curve(
+        fill: arrow-fill,
+        // Base of the arrow.
+        curve.move((
+          (start-file - width + 1) * square-size
+            + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
+          -start-rank * square-size
+            + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
+        )),
+        curve.line((
+          (start-file - width + 1) * square-size
+            + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
+          -start-rank * square-size
+            + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
+        )),
+        // Right before the arrow head.
+        curve.line((
+          (end-file - width + 1) * square-size
+            - calc.sin(angle) * arrow-thickness / 2
+            - calc.cos(angle) * (head-length + tip),
+          -end-rank * square-size
+            + calc.cos(angle) * arrow-thickness / 2
+            - calc.sin(angle) * (head-length + tip),
+        )),
+        // Arrow head.
+        curve.line((
+          (end-file - width + 1) * square-size
+            - calc.sin(angle) * head-thickness / 2
+            - calc.cos(angle) * (head-length + tip),
+          -end-rank * square-size
+            + calc.cos(angle) * head-thickness / 2
+            - calc.sin(angle) * (head-length + tip),
+        )),
+        curve.line((
+          (end-file - width + 1) * square-size
+            - calc.cos(angle) * tip,
+          -end-rank * square-size
+            - calc.sin(angle) * tip,
+        )),
+        curve.line((
+          (end-file - width + 1) * square-size
+            + calc.sin(angle) * head-thickness / 2
+            - calc.cos(angle) * (head-length + tip),
+          -end-rank * square-size
+            - calc.cos(angle) * head-thickness / 2
+            - calc.sin(angle) * (head-length + tip),
+        )),
+        // Right after the arrow head.
+        curve.line((
+          (end-file - width + 1) * square-size
+            + calc.sin(angle) * arrow-thickness / 2
+            - calc.cos(angle) * (head-length + tip),
+          -end-rank * square-size
+            - calc.cos(angle) * arrow-thickness / 2
+            - calc.sin(angle) * (head-length + tip),
+        )),
+        curve.close(),
       )
     }
 
