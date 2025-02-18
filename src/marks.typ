@@ -7,15 +7,32 @@
 }
 
 /// Marks a square with a circle.
-#let circle(paint: default-color, thickness: 0.15cm, margin: 0.05cm) = {
+#let circle(paint: default-color, thickness: 15%, margin: 5%) = {
+  // Force a (possibly relative) length.
+  thickness = thickness + 0pt
+  if type(thickness) == relative {
+    return layout(((width, ..)) => {
+      circle(paint: paint, thickness: thickness.ratio * width + thickness.length, margin: margin)
+    })
+  }
+
   std.circle(
     width: 100% - thickness - 2 * margin,
+    fill: none,
     stroke: paint + thickness,
   )
 }
 
 /// Marks a square with a cross.
-#let cross(paint: default-color, thickness: 0.15cm, margin: 0.05cm) = {
+#let cross(paint: default-color, thickness: 15%, margin: 5%) = {
+  // Force a (possibly relative) length.
+  thickness = thickness + 0pt
+  if type(thickness) == relative {
+    return layout(((width, ..)) => {
+      cross(paint: paint, thickness: thickness.ratio * width + thickness.length, margin: margin)
+    })
+  }
+
   set align(top + left)
 
   let offset = thickness / calc.sqrt(8)
@@ -23,17 +40,13 @@
   let end = 100% - margin - offset
 
   std.curve(
+    fill: none,
     stroke: paint + thickness,
-    curve.move((50%, 50%)),
-    curve.line((start, start)),
-    curve.close(),
-    curve.move((50%, 50%)),
-    curve.line((start, end)),
-    curve.close(),
-    curve.move((50%, 50%)),
+    curve.move((start, start)),
     curve.line((end, end)),
     curve.close(),
-    curve.move((50%, 50%)),
+    curve.move((start, end)),
     curve.line((end, start)),
+    curve.close(),
   )
 }
