@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 0.6.0
+
+- Add the ability to use different marks.
+    - `board`'s `marked-squares` argument can now be a dictionary.
+    - Remove `board`'s `marking-color`, `marked-white-square-background`, and `marked-black-square-background` arguments in favor of `white-mark` and `black-mark`.
+    - Add a `marks` submodule containing some marks: `fill`, `circle`, and `cross`.
+
+- Improve the look of arrows and replace `board`'s `arrow-stroke` argument with `arrow-fill` and `arrow-thickness`.
+
 ## Version 0.5.0
 
 - Add symbols for all Unicode chess-related codepoints.
