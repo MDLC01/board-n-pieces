@@ -327,11 +327,7 @@ impl<'a> PgnParser<'a> {
             .unwrap_or(self.content.len());
         let (san, remainder) = self.content.split_at(i);
         self.content = remainder;
-        if san.is_empty() {
-            None
-        } else {
-            Some(san)
-        }
+        if san.is_empty() { None } else { Some(san) }
     }
 
     /// Parses a movetext move.

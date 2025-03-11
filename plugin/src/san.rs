@@ -580,7 +580,10 @@ impl Display for AlgebraicTurn {
                     None => "".into(),
                     Some(piece) => format!("={piece}"),
                 };
-                write!(f, "{piece_text}{departure_file_text}{departure_rank_text}{capture_text}{destination_file}{destination_rank}{promote_text}")
+                write!(
+                    f,
+                    "{piece_text}{departure_file_text}{departure_rank_text}{capture_text}{destination_file}{destination_rank}{promote_text}",
+                )
             }
             Self::Castle(Side::King) => write!(f, "0-0"),
             Self::Castle(Side::Queen) => write!(f, "0-0-0"),

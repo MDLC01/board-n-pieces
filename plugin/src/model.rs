@@ -1,4 +1,4 @@
-use crate::utils::{cartesian_product, CharExt, Finite, FromChar, Name};
+use crate::utils::{CharExt, Finite, FromChar, Name, cartesian_product};
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Index, IndexMut};
