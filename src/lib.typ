@@ -108,13 +108,13 @@
 }
 
 
-/// Creates an array containing the successive positions of the game with the
-/// given turns.
+/// Creates an array containing the successive results of applying the given
+/// turns.
 ///
 /// Turns can be specified as an array of strings using standard algebraic
 /// notation. Alternatively, you can also specify a single string containing
 /// whitespace-separated turns.
-#let game(starting-position: starting-position, turns) = {
+#let play(starting-position: starting-position, turns) = {
   import "internals.typ": replay-game
   if type(turns) == str {
     turns = turns.split()

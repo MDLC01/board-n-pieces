@@ -83,20 +83,20 @@ A position can be inverted using the `invert-position` function. Reversing a pos
 )
 #stack(
   dir: ltr,
-  spacing: 1cm,
+  spacing: 0.5cm,
   board(reverse: true, puzzle),
   board(invert-position(puzzle)),
 )
 ```
 
-### Using the `game` function
+### Applying a turn to a position
 
-The `game` function creates an array of positions from a full chess game. A game is described by a series of turns written in [standard algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). Those turns can be specified as an array of strings, or as a single string containing whitespace-separated moves.
+The `play` function creates an array containing the successive results of applying turns to a starting position. Turns are described by a series of turns written in [standard algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). Those turns can be specified as an array of strings, or as a single string containing whitespace-separated moves. In particular, this can be used to generate the intermediate positions of an entire chess game.
 
 ```example
 %show: pad.with(0.5cm)
 The scholar's mate:
-#let positions = game("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
+#let positions = play("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
 #grid(
   columns: 4,
   gutter: 0.2cm,
@@ -104,12 +104,23 @@ The scholar's mate:
 )
 ```
 
-You can specify an alternative starting position to the `game` function with the `starting-position` named argument.
+You can specify an alternative starting position to the `play` function with the `starting-position` named argument. This can be used to apply a single move to a specific position.
+
+```example
+#let initial = fen("r1bqkbnr/ppp1pppp/2n5/3p4/3P4/4P3/PPP2PPP/RNBQKBNR")
+#let next = play(starting-position: initial, "Bb5").last()
+#stack(
+  dir: ltr,
+  spacing: 0.5cm,
+  board(initial),
+  board(next),
+)
+```
 
 
 ## Using the `pgn` function to import PGN files
 
-Similarly to the `game` function, the `pgn` function creates an array of positions. It accepts a single argument, which is a string containing [portable game notation](https://en.wikipedia.org/wiki/Portable_Game_Notation). To read a game from a PGN file, you can use this function in combination with Typst's native [`read`](https://typst.app/docs/reference/data-loading/read/) function.
+Similarly to the `play` function, the `pgn` function creates an array of positions. It accepts a single argument, which is a string containing [portable game notation](https://en.wikipedia.org/wiki/Portable_Game_Notation). To read a game from a PGN file, you can use this function in combination with Typst's native [`read`](https://typst.app/docs/reference/data-loading/read/) function.
 
 ```typ
 #let positions = pgn(read("game.pgn"))
