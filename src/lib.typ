@@ -84,6 +84,13 @@
 }
 
 
+/// Inverts this position, mirroring it, and flipping the piece colors.
+#let invert-position(position) = {
+  import "internals.typ": invert-position
+  invert-position(position)
+}
+
+
 /// Creates a position using Forsyth–Edwards Notation.
 ///
 /// For example, this creates the starting position.

@@ -1,5 +1,12 @@
 #let functions = plugin("plugin.wasm")
 
+#let invert-position(position) = {
+  (
+    type: "board-n-pieces:fen",
+    fen: str(functions.invert_position(bytes(position.fen))),
+  )
+}
+
 #let replay-game(starting-position, turns) = {
   let game = functions.replay_game(
     bytes(starting-position.fen),

@@ -84,7 +84,7 @@ impl Move {
 
         Position {
             board: new_board,
-            active: position.active.other(),
+            active: position.active.flip(),
             castling_availabilities,
             en_passant_target_file: self.en_passant_metadata.skip_file(),
             halfmove,
@@ -535,7 +535,7 @@ impl AlgebraicTurn {
 
                 Ok(Position {
                     board: new_board,
-                    active: initial_position.active.other(),
+                    active: initial_position.active.flip(),
                     castling_availabilities: initial_position
                         .castling_availabilities
                         .remove_for(initial_position.active),

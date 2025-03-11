@@ -61,7 +61,35 @@ Also note that positions do not need to be on a standard 8×8 board:
 ```
 
 
-## Using the `game` function
+## Manipulating positions
+
+A position is a value that can be returned by the `position` or `fen` function. Positions can be manipulated in various ways.
+
+### Reversing positions
+
+A position can be inverted using the `invert-position` function. Reversing a position consists of mirroring it, and changing the color of the pieces. For example, this can be used to turn a Black to move puzzle into a White to move puzzle.
+
+```example
+// From https://chesspuzzle.net/Puzzle/928240.
+#let puzzle = position(
+  "kb.....r",
+  ".p...ppp",
+  "pQ..p...",
+  ".N.....q",
+  "..P..n..",
+  "R.......",
+  "PP...PPn",
+  "....R.K.",
+)
+#stack(
+  dir: ltr,
+  spacing: 1cm,
+  board(reverse: true, puzzle),
+  board(invert-position(puzzle)),
+)
+```
+
+### Using the `game` function
 
 The `game` function creates an array of positions from a full chess game. A game is described by a series of turns written in [standard algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). Those turns can be specified as an array of strings, or as a single string containing whitespace-separated moves.
 

@@ -23,3 +23,8 @@
 #test-pgn("lichess-NuxTdFcv.pgn", "8/8/1pr2Pk1/p7/P5R1/3nP1P1/1B3P1P/6K1 b - - 2 50")
 // https://lichess.org/4cCk7Gi5
 #test-pgn("lichess-4cCk7Gi5.pgn", "5r2/5k1p/1p2p3/p1p1P3/5P1b/1P2P2q/PB3RR1/5K2 w - - 1 44")
+
+// Test inverting positions.
+#assert.eq(bnp.invert-position(bnp.starting-position).fen, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
+#assert.eq(bnp.invert-position(bnp.invert-position(bnp.starting-position)).fen, bnp.starting-position.fen)
+#assert.eq(bnp.invert-position(bnp.fen("rQ6/P7/8/q7/1R6/8/8/k3K3 w - - 0 1")).fen, "K3k3/8/8/1r6/Q7/8/p7/Rq6 b - - 0 1")

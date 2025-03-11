@@ -27,6 +27,13 @@ fn serialize_position_sequence(positions: impl IntoIterator<Item = Position>) ->
 }
 
 #[wasm_func]
+pub fn invert_position(position: &[u8]) -> Result<Vec<u8>> {
+    let position =
+        std::str::from_utf8(position).map_err(|_| "internal error: FEN should be valid UTF-8")?;
+    Ok(fen(parse_fen(position)?.invert()).into_bytes())
+}
+
+#[wasm_func]
 pub fn replay_game(starting_position: &[u8], turns: &[u8]) -> Result<Vec<u8>> {
     let starting_position = std::str::from_utf8(starting_position)
         .map_err(|_| "internal error: FEN should be valid UTF-8")?;

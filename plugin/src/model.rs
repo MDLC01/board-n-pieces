@@ -295,7 +295,7 @@ pub enum Color {
 }
 
 impl Color {
-    pub fn other(self) -> Self {
+    pub fn flip(self) -> Self {
         match self {
             Self::White => Self::Black,
             Self::Black => Self::White,
@@ -382,6 +382,14 @@ impl Piece {
     pub fn new(color: Color, kind: PieceKind) -> Self {
         Self { color, kind }
     }
+
+    /// Flips the color of this piece.
+    pub fn flip(self) -> Self {
+        Self {
+            color: self.color.flip(),
+            kind: self.kind,
+        }
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -405,6 +413,17 @@ impl SquareContent {
             Self::Piece(p) => p == piece,
         }
     }
+
+    pub fn map(self, f: impl FnOnce(Piece) -> Piece) -> Self {
+        match self {
+            Self::Empty => Self::Empty,
+            Self::Piece(p) => Self::Piece(f(p)),
+        }
+    }
+
+    pub fn flip(self) -> Self {
+        self.map(Piece::flip)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -416,6 +435,20 @@ pub struct Board<const WIDTH: usize = 8, const HEIGHT: usize = 8> {
 impl<const WIDTH: usize, const HEIGHT: usize> Board<WIDTH, HEIGHT> {
     pub fn new(squares: [[SquareContent; WIDTH]; HEIGHT]) -> Self {
         Self { squares }
+    }
+
+    /// Mirrors the board vertically (i.e., along a horizontal axis).
+    pub fn mirror(&self) -> Self {
+        let mut squares = self.squares;
+        squares.reverse();
+        Self { squares }
+    }
+
+    /// Flips the colors of the pieces.
+    pub fn flip(&self) -> Self {
+        Self {
+            squares: self.squares.map(|r| r.map(SquareContent::flip)),
+        }
     }
 }
 
@@ -448,6 +481,15 @@ impl CastlingAvailabilities {
         black_kingside: true,
         black_queenside: true,
     };
+
+    pub fn flip(self) -> Self {
+        Self {
+            white_kingside: self.black_kingside,
+            white_queenside: self.black_queenside,
+            black_kingside: self.white_kingside,
+            black_queenside: self.white_queenside,
+        }
+    }
 
     pub fn kingside_for(self, color: Color) -> bool {
         match color {
@@ -511,6 +553,18 @@ impl Position {
             self.fullmove + 1
         } else {
             self.fullmove
+        }
+    }
+
+    /// Inverts this position, mirroring it, and flipping the piece colors.
+    pub fn invert(&self) -> Self {
+        Self {
+            board: self.board.mirror().flip(),
+            active: self.active.flip(),
+            castling_availabilities: self.castling_availabilities.flip(),
+            en_passant_target_file: self.en_passant_target_file.map(File::mirror),
+            halfmove: self.halfmove,
+            fullmove: self.fullmove,
         }
     }
 }
