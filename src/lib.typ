@@ -339,6 +339,8 @@
     let head-thickness = 2 * arrow-thickness
     let head-length = 1.5 * arrow-thickness
     let tip = square-size / 6
+    let tail-x = calc.cos(angle) * arrow-base-offset
+    let tail-y = calc.sin(angle) * arrow-base-offset
 
     let arrow = {
       // Arrows are all placed in the bottom right square.
@@ -350,18 +352,18 @@
         // Base of the arrow.
         curve.move((
           (start-file - width + 1) * square-size
-            + calc.cos(angle) * arrow-base-offset
+            + tail-x
             + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
           -start-rank * square-size
-            + calc.sin(angle) * arrow-base-offset
+            + tail-y
             + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
         )),
         curve.line((
           (start-file - width + 1) * square-size
-            + calc.cos(angle) * arrow-base-offset
+            + tail-x
             + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
           -start-rank * square-size
-            + calc.sin(angle) * arrow-base-offset
+            + tail-y
             + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
         )),
         // Right before the arrow head.
