@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.7.0
+
+- Add `invert-position` function.
+
+- Rename the `game` function to `play`.
+
+- Add `arrow-base-offset` parameter to `board`.
+
 ## Version 0.6.0
 
 - Add the ability to use different marks.
