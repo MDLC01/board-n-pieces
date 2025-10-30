@@ -196,14 +196,13 @@
   ///
   /// Can be expressed as a percentage of the square size.
   arrow-thickness: 20%,
-  /// How far from the center of the starting square the arrow base should be positioned.
-  /// It is expressed as a percentage of the square size.
-  /// Must be in the range [-50%, 50%]. Defaults to 25%.
+  /// How far from the center of the starting square the arrow base should be
+  /// positioned. It is expressed as a percentage of the square size and must be
+  /// in the range [0%, 50%], with a default of 25%.
   ///
-  /// A value of 0% positions the arrow base at the center of the starting square,
-  /// A value of 25% positions it halfway to the edge (default),
-  /// A value of 50% positions it at the edge of the starting square (for horizontal and vertical arrows),
-  /// Negative values make the arrow start before the center of the starting square
+  /// For horizontal and vertical arrows, a value of 0% positions the arrow base
+  /// at the center of the starting square, a value of 25% (default) halfway to
+  /// the edge, and a value of 50% at the edge.
   arrow-base-offset: 25%,
   /// How to display each piece.
   ///
