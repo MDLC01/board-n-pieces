@@ -196,6 +196,13 @@
   ///
   /// Can be expressed as a percentage of the square size.
   arrow-thickness: 20%,
+  /// How far from the center of the starting square the arrow base should be positioned.
+  /// It is expressed as a percentage of the square size.
+  ///
+  /// A value of 0% positions the arrow base at the center of the starting square,
+  /// A value of 50% positions it halfway to the edge (this is the default),
+  /// A value of 100% positions it at the edge.
+  arrow-base-offset: 50%,
   /// How to display each piece.
   ///
   /// See README for more information (including licensing) on the default
@@ -269,6 +276,9 @@
   arrow-thickness = arrow-thickness + 0% + 0pt
   arrow-thickness = arrow-thickness.ratio * square-size + arrow-thickness.length
 
+  arrow-base-offset = arrow-base-offset + 0% + 0pt
+  arrow-base-offset = arrow-base-offset.ratio * square-size + arrow-base-offset.length
+
   // Doing this lazily to save time when loading the package.
   if pieces == auto {
     pieces = (
@@ -339,14 +349,18 @@
         // Base of the arrow.
         curve.move((
           (start-file - width + 1) * square-size
+            + calc.cos(angle) * arrow-base-offset
             + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
           -start-rank * square-size
+            + calc.sin(angle) * arrow-base-offset
             + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
         )),
         curve.line((
           (start-file - width + 1) * square-size
+            + calc.cos(angle) * arrow-base-offset
             + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
           -start-rank * square-size
+            + calc.sin(angle) * arrow-base-offset
             + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
         )),
         // Right before the arrow head.

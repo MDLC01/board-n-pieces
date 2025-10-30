@@ -195,7 +195,7 @@ Here is a list of all the available arguments:
 
 - `white-mark` and `black-mark` are the marks to use by default for the corresponding squares.
 
-- `arrow-fill` and `arrow-thickness` describe how to draw the arrows.
+- `arrow-fill`, `arrow-thickness` and `arrow-base-offset` describe how to draw the arrows.
 
 - `pieces` is a dictionary containing images representing each piece. If specified, the dictionary must contain an entry for every piece kind in the displayed position. Keys are single upper-case letters for white pieces and single lower-case letters for black pieces. The default images are taken from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). Please refer to [the section on licensing](#licensing) for information on how you can use them in your documents.
 
