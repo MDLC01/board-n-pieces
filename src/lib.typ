@@ -279,12 +279,10 @@
 
   arrow-base-offset = arrow-base-offset + 0% + 0pt
   arrow-base-offset = arrow-base-offset.ratio * square-size + arrow-base-offset.length
-  
-  // Validate arrow-base-offset range
-  let offset-ratio = arrow-base-offset / square-size
+  let arrow-base-offset-ratio = arrow-base-offset / square-size
   assert(
-    offset-ratio >= -0.5 and offset-ratio <= 0.5,
-    message: "arrow-base-offset must be in the range [-50%, 50%], got " + str(calc.round(offset-ratio * 100, digits: 1)) + "%"
+    0.0 <= arrow-base-offset-ratio and arrow-base-offset-ratio <= 0.5,
+    message: "`arrow-base-offset` must be in the range [0%, 50%], got " + str(calc.round(arrow-base-offset-ratio * 100, digits: 1)) + "%",
   )
 
   // Doing this lazily to save time when loading the package.
