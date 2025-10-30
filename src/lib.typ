@@ -196,6 +196,14 @@
   ///
   /// Can be expressed as a percentage of the square size.
   arrow-thickness: 20%,
+  /// How far from the center of the starting square the arrow base should be
+  /// positioned. It is expressed as a percentage of the square size and must be
+  /// in the range [0%, 50%], with a default of 25%.
+  ///
+  /// For horizontal and vertical arrows, a value of 0% positions the arrow base
+  /// at the center of the starting square, a value of 25% (default) halfway to
+  /// the edge, and a value of 50% at the edge.
+  arrow-base-offset: 25%,
   /// How to display each piece.
   ///
   /// See README for more information (including licensing) on the default
@@ -269,6 +277,14 @@
   arrow-thickness = arrow-thickness + 0% + 0pt
   arrow-thickness = arrow-thickness.ratio * square-size + arrow-thickness.length
 
+  arrow-base-offset = arrow-base-offset + 0% + 0pt
+  arrow-base-offset = arrow-base-offset.ratio * square-size + arrow-base-offset.length
+  let arrow-base-offset-ratio = arrow-base-offset / square-size
+  assert(
+    0.0 <= arrow-base-offset-ratio and arrow-base-offset-ratio <= 0.5,
+    message: "`arrow-base-offset` must be in the range [0%, 50%], got " + str(calc.round(arrow-base-offset-ratio * 100, digits: 1)) + "%",
+  )
+
   // Doing this lazily to save time when loading the package.
   if pieces == auto {
     pieces = (
@@ -328,6 +344,8 @@
     let head-thickness = 2 * arrow-thickness
     let head-length = 1.5 * arrow-thickness
     let tip = square-size / 6
+    let tail-x = (start-file - width + 1) * square-size + calc.cos(angle) * arrow-base-offset
+    let tail-y = -start-rank * square-size + calc.sin(angle) * arrow-base-offset
 
     let arrow = {
       // Arrows are all placed in the bottom right square.
@@ -338,16 +356,12 @@
         fill: arrow-fill,
         // Base of the arrow.
         curve.move((
-          (start-file - width + 1) * square-size
-            + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
-          -start-rank * square-size
-            + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
+          tail-x + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
+          tail-y + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
         )),
         curve.line((
-          (start-file - width + 1) * square-size
-            + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
-          -start-rank * square-size
-            + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
+          tail-x + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
+          tail-y + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
         )),
         // Right before the arrow head.
         curve.line((
