@@ -197,12 +197,14 @@
   /// Can be expressed as a percentage of the square size.
   arrow-thickness: 20%,
   /// How far from the center of the starting square the arrow base should be positioned.
-  /// It is expressed as a percentage of half the width of a square
-  /// Default to 50%
+  /// It is expressed as a percentage of the square size.
+  /// Must be in the range [-50%, 50%]. Defaults to 25%.
   ///
   /// A value of 0% positions the arrow base at the center of the starting square,
-  /// A value of 100% positions it at the edge of the starting square (for horizontal and vertical arrows),
-  arrow-base-offset: 50%,
+  /// A value of 25% positions it halfway to the edge (default),
+  /// A value of 50% positions it at the edge of the starting square (for horizontal and vertical arrows),
+  /// Negative values make the arrow start before the center of the starting square
+  arrow-base-offset: 25%,
   /// How to display each piece.
   ///
   /// See README for more information (including licensing) on the default
@@ -277,7 +279,14 @@
   arrow-thickness = arrow-thickness.ratio * square-size + arrow-thickness.length
 
   arrow-base-offset = arrow-base-offset + 0% + 0pt
-  arrow-base-offset = arrow-base-offset.ratio * (square-size / 2) + arrow-base-offset.length
+  arrow-base-offset = arrow-base-offset.ratio * square-size + arrow-base-offset.length
+  
+  // Validate arrow-base-offset range
+  let offset-ratio = arrow-base-offset / square-size
+  assert(
+    offset-ratio >= -0.5 and offset-ratio <= 0.5,
+    message: "arrow-base-offset must be in the range [-50%, 50%], got " + str(calc.round(offset-ratio * 100, digits: 1)) + "%"
+  )
 
   // Doing this lazily to save time when loading the package.
   if pieces == auto {
