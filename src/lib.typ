@@ -198,11 +198,12 @@
   arrow-thickness: 20%,
   /// How far from the center of the starting square the arrow base should be positioned.
   /// It is expressed as a percentage of the square size.
+  /// Default to 25%
   ///
   /// A value of 0% positions the arrow base at the center of the starting square,
-  /// A value of 50% positions it halfway to the edge (this is the default),
-  /// A value of 100% positions it at the edge.
-  arrow-base-offset: 50%,
+  /// A value of 50% positions it at the edge of the starting square (for horizontal and vertical arrows),
+  /// A value of 100% positions it at the center of the next square (for horizontal and vertical arrows).
+  arrow-base-offset: 25%,
   /// How to display each piece.
   ///
   /// See README for more information (including licensing) on the default
