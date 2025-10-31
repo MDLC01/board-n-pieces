@@ -239,3 +239,10 @@
   arrow-base-offset: 50%,
   reverse: true,
 )
+
+---
+#bnp.board(
+  bnp.starting-position,
+  knight-move-arrow: "angled",
+  arrows: ("d2 d4", "d5 e5", "c5 e3", "f5 h6", "f4 h3", "c5 a6", "c4 a3", "g1 f3", "b1 c3", "b8 c6", "g8 f6"),
+)

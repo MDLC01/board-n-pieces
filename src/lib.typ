@@ -162,7 +162,7 @@
   marked-squares: (:),
   /// A list of arrows to draw.
   ///
-  /// Must be a list of strings containg the start and end squares. For example,
+  /// Must be a list of strings containing the start and end squares. For example,
   /// `("e2 e4", "e7 e5")` or, more compactly, `("e2e4", "e7e5")`.
   arrows: (),
 
@@ -204,6 +204,11 @@
   /// at the center of the starting square, a value of 25% (default) halfway to
   /// the edge, and a value of 50% at the edge.
   arrow-base-offset: 25%,
+  /// How to draw knight move arrows.
+  ///
+  /// Can be either "straight" for direct arrows from start to end square (default)
+  /// or "angled" for L-shaped arrows.
+  knight-move-arrow: "straight",
   /// How to display each piece.
   ///
   /// See README for more information (including licensing) on the default
@@ -219,6 +224,9 @@
     square-coordinates,
     square-name,
     stroke-sides,
+    is-knight-move,
+    draw-straight-arrow,
+    draw-knight-move-arrow,
   )
 
   position = resolve-position(position)
@@ -285,6 +293,12 @@
     message: "`arrow-base-offset` must be in the range [0%, 50%], got " + str(calc.round(arrow-base-offset-ratio * 100, digits: 1)) + "%",
   )
 
+  // Validate knight-move-arrow parameter
+  assert(
+    knight-move-arrow in ("angled", "straight"),
+    message: "`knight-move-arrow` must be either \"angled\" or \"straight\", got \"" + str(knight-move-arrow) + "\"",
+  )
+
   // Doing this lazily to save time when loading the package.
   if pieces == auto {
     pieces = (
@@ -332,82 +346,13 @@
 
   let grid-elements = squares.flatten()
 
-  for ((start-file, start-rank), (end-file, end-rank)) in arrows {
-    if reverse {
-      start-file = width - start-file - 1
-      start-rank = height - start-rank - 1
-      end-file = width - end-file - 1
-      end-rank = height - end-rank - 1
+  for arrow-coordinates in arrows {
+    let arrow-draw-fn = if knight-move-arrow == "angled" and is-knight-move(arrow-coordinates) {
+      draw-knight-move-arrow
+    } else {
+      draw-straight-arrow
     }
-
-    let angle = calc.atan2(end-file - start-file, start-rank - end-rank)
-    let head-thickness = 2 * arrow-thickness
-    let head-length = 1.5 * arrow-thickness
-    let tip = square-size / 6
-    let tail-x = (start-file - width + 1) * square-size + calc.cos(angle) * arrow-base-offset
-    let tail-y = -start-rank * square-size + calc.sin(angle) * arrow-base-offset
-
-    let arrow = {
-      // Arrows are all placed in the bottom right square.
-      show: place.with(center + horizon)
-      show: place
-
-      curve(
-        fill: arrow-fill,
-        // Base of the arrow.
-        curve.move((
-          tail-x + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
-          tail-y + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
-        )),
-        curve.line((
-          tail-x + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
-          tail-y + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
-        )),
-        // Right before the arrow head.
-        curve.line((
-          (end-file - width + 1) * square-size
-            - calc.sin(angle) * arrow-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            + calc.cos(angle) * arrow-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        // Arrow head.
-        curve.line((
-          (end-file - width + 1) * square-size
-            - calc.sin(angle) * head-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            + calc.cos(angle) * head-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        curve.line((
-          (end-file - width + 1) * square-size
-            - calc.cos(angle) * tip,
-          -end-rank * square-size
-            - calc.sin(angle) * tip,
-        )),
-        curve.line((
-          (end-file - width + 1) * square-size
-            + calc.sin(angle) * head-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            - calc.cos(angle) * head-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        // Right after the arrow head.
-        curve.line((
-          (end-file - width + 1) * square-size
-            + calc.sin(angle) * arrow-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            - calc.cos(angle) * arrow-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        curve.close(),
-      )
-    }
-
+    let arrow = arrow-draw-fn(arrow-coordinates, reverse, arrow-thickness, square-size, width, arrow-base-offset, arrow-fill, height)
     if reverse {
       grid-elements.first() += arrow
     } else {

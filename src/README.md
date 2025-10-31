@@ -197,6 +197,8 @@ Here is a list of all the available arguments:
 
 - `arrow-fill`, `arrow-thickness` and `arrow-base-offset` describe how to draw the arrows.
 
+- `knight-move-arrow` describes how to draw knight move arrows. Can be either `"straight"` for direct arrows from start to end square (this is the default), or `"angled"` for L-shaped arrows.
+
 - `pieces` is a dictionary containing images representing each piece. If specified, the dictionary must contain an entry for every piece kind in the displayed position. Keys are single upper-case letters for white pieces and single lower-case letters for black pieces. The default images are taken from [Wikimedia Commons](https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces). Please refer to [the section on licensing](#licensing) for information on how you can use them in your documents.
 
 - `stroke` has the same structure as [`rect`'s `stroke` parameter](https://typst.app/docs/reference/visualize/rect/#parameters-stroke) and corresponds to the stroke to use around the board. If `display-numbers` is `true`, the numbers are displayed outside the stroke. The default value is `none`.
