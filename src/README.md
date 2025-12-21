@@ -191,6 +191,8 @@ Here is a list of all the available arguments:
 
 - `square-size` is a length describing the size of each square. By default, this is `1cm`.
 
+- `square-stroke` specifies the stroke to use around individual squares. The default is `none`.
+
 - `white-square-fill` and `black-square-fill` indicate how squares should be filled. They can be colors, gradients or patterns.
 
 - `white-mark` and `black-mark` are the marks to use by default for the corresponding squares.

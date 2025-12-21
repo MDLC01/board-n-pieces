@@ -178,6 +178,8 @@
 
   /// The size of each square.
   square-size: 1cm,
+  /// The stroke to add between squares.
+  square-stroke: none,
   /// How to fill white squares.
   white-square-fill: rgb("#ffce9e"),
   /// How to fill black squares.
@@ -414,6 +416,8 @@
     }
   }
 
+  squares = squares.map(square => grid.cell(stroke: square-stroke, square))
+
   let grid-elements = if not display-numbers {
     squares
   } else {
@@ -522,18 +526,6 @@
       } else {
         black-square-fill
       }
-    },
-
-    columns: if display-numbers {
-      (auto, ) + (square-size, ) * width + (auto, )
-    } else {
-      (square-size, ) * width
-    },
-
-    rows: if display-numbers {
-      (auto, ) + (square-size, ) * height + (auto, )
-    } else {
-      (square-size, ) * height
     },
 
     ..grid-elements,
