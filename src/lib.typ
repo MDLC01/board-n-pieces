@@ -329,8 +329,7 @@
       })
     })
     .rev()
-
-  let grid-elements = squares.flatten()
+    .flatten()
 
   for ((start-file, start-rank), (end-file, end-rank)) in arrows {
     if reverse {
@@ -409,13 +408,15 @@
     }
 
     if reverse {
-      grid-elements.first() += arrow
+      squares.first() += arrow
     } else {
-      grid-elements.last() += arrow
+      squares.last() += arrow
     }
   }
 
-  if display-numbers {
+  let grid-elements = if not display-numbers {
+    squares
+  } else {
     let number-cell = grid.cell.with(
       inset: 0.3em,
     )
@@ -427,9 +428,9 @@
         .map(number-cell),
       none,
     )
-    grid-elements = (
+    (
       ..column-numbers,
-      ..grid-elements
+      ..squares
         .chunks(width)
         .enumerate()
         .map(((i, rank)) => {
@@ -492,11 +493,22 @@
 
   show: block.with(breakable: false)
   set text(dir: ltr)
-  set grid.cell(
+  grid(
+    columns: if display-numbers {
+      (auto, ) + (square-size, ) * width + (auto, )
+    } else {
+      (square-size, ) * width
+    },
+
+    rows: if display-numbers {
+      (auto, ) + (square-size, ) * height + (auto, )
+    } else {
+      (square-size, ) * height
+    },
+
     inset: 0pt,
     align: center + horizon,
-  )
-  grid(
+
     fill: (x, y) => {
       if display-numbers {
         x -= 1
