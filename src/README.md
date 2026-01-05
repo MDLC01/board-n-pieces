@@ -185,6 +185,7 @@ The `board` function lets you customize the appearance of the board in various w
   fen("3k4/7R/8/2PK4/8/8/8/6r1 b - - 0 1"),
 
   marked-squares: (
+    // More predefined marks in the `marks` module.
     "c7 c6": marks.circle(),
     "h6": marks.cross(paint: rgb("#ffca3ad0")),
   ),
