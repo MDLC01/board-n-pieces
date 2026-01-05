@@ -197,7 +197,7 @@
     a5: bnp.marks.cross(paint: yellow),
   ),
 
-  arrows: "a1 a8",
+  arrows: (("a1", "a8"),),
   arrow-fill: tiling(text(size: 6pt)[up]),
   arrow-thickness: 25%,
 )

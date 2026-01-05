@@ -181,7 +181,7 @@ Here is a list of all the available arguments:
 
 - `marked-squares` is a list of squares to mark (e.g., `("d3", "d2", "e3")`). It can also be specified as a single string containing whitespace-separated squares (e.g., `"d3 d2 e3"`). For full customization, a dictionary can be provided, where the keys are the squares, and the values the marks to use. A set of marks is available in the `marks` module: `fill`, `circle`, and `cross`.
 
-- `arrows` is a list of arrows to draw (e.g., `("e2 e4", "e7 e5")`).
+- `arrows` is a list of arrows to draw (e.g., `(("e2", "e4"), ("e7", "e5"))` or, more compactly `("e2e4", "e7e5")`).
 
 - `reverse` is a boolean indicating whether to reverse the board, displaying it from Black's point of view. This is `false` by default, meaning the board is displayed from White's point of view.
 

@@ -162,8 +162,9 @@
   marked-squares: (:),
   /// A list of arrows to draw.
   ///
-  /// Must be a list of strings containg the start and end squares. For example,
-  /// `("e2 e4", "e7 e5")` or, more compactly, `("e2e4", "e7e5")`.
+  /// Must be an array of `(start, end)` pairs. Alternatively, you can pass an
+  /// array of strings: for example, `("e2 e4", "e7 e5")` or, more compactly,
+  /// `("e2e4", "e7e5")`.
   arrows: (),
 
   /// Whether to reverse the board and display it from Black's point of view
@@ -258,22 +259,20 @@
     message: "`marked-squares` should be a string, array, or dictionary",
   )
 
-  if type(arrows) == str {
-    arrows = (arrows, )
-  }
   arrows = arrows.map(arrow => {
-    if arrow.len() == 4 {
-      (
-        square-coordinates(arrow.slice(0, 2)),
-        square-coordinates(arrow.slice(2, 4)),
-      )
+    let (start, end) = if type(arrow) == str {
+      if arrow.len() == 4 {
+        (arrow.slice(0, 2), arrow.slice(2, 4))
+      } else {
+        arrow.split()
+      }
     } else {
-      let (start, end) = arrow.split()
-      (
-        square-coordinates(start),
-        square-coordinates(end),
-      )
+      arrow
     }
+    (
+      square-coordinates(start),
+      square-coordinates(end),
+    )
   })
 
   arrow-thickness = arrow-thickness + 0% + 0pt
