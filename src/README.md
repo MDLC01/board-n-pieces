@@ -96,7 +96,7 @@ The `play` function creates an array containing the successive results of applyi
 ```example
 %show: pad.with(0.5cm)
 The scholar's mate:
-#let positions = play("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
+#let positions = play("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7").positions
 #grid(
   columns: 4,
   gutter: 0.2cm,
@@ -108,12 +108,37 @@ You can specify an alternative starting position to the `play` function with the
 
 ```example
 #let initial = fen("r1bqkbnr/ppp1pppp/2n5/3p4/3P4/4P3/PPP2PPP/RNBQKBNR")
-#let next = play(starting-position: initial, "Bb5").last()
+#let next = play(starting-position: initial, "Bb5").positions.last()
 #stack(
   dir: ltr,
   spacing: 0.5cm,
   board(initial),
   board(next),
+)
+```
+
+In addition to computing the successive positions, `play` also computes the moves that were applied at each point. Here is a more complex example that uses this information to draw arrows and highlight squares as well:
+
+```example
+%show: pad.with(0.5cm)
+The scholar's mate:
+#let game = play("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
+#grid(
+  columns: 4,
+  gutter: 0.2cm,
+  ..game.positions.enumerate().map(((i, position)) => {
+    if i == 0 {
+      board(square-size: 0.5cm, position)
+    } else {
+      let move = game.moves.at(i - 1)
+      board(
+        marked-squares: move.first(),
+        arrows: (move,),
+        square-size: 0.5cm,
+        position,
+      )
+    }
+  }),
 )
 ```
 

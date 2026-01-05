@@ -108,8 +108,12 @@
 }
 
 
-/// Creates an array containing the successive results of applying the given
-/// turns.
+/// Computes the successive positions and moves of a game.
+///
+/// Returns a dictionary with the following keys:
+/// - `positions`, an array containing the successive results of applying the
+///   given turns.
+/// - `moves`, an array containing the moves that were performed.
 ///
 /// Turns can be specified as an array of strings using standard algebraic
 /// notation. Alternatively, you can also specify a single string containing
@@ -123,8 +127,8 @@
 }
 
 
-/// Creates an array containing the successive positions of a game described
-/// using Portable Game Notation.
+/// Computes the successive positions and moves of a game described using
+/// Portable Game Notation.
 #let pgn(pgn-string) = {
   import "internals.typ": game-from-pgn
   game-from-pgn(pgn-string)

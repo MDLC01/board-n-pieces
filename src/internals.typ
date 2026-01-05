@@ -7,25 +7,30 @@
   )
 }
 
+#let deserialize-game(game) = {
+  let (positions, moves) = array(game).split(0xff)
+  (
+    positions: positions.split(0).map(position => (
+      type: "board-n-pieces:fen",
+      fen: str(bytes(position))
+    )),
+    moves: moves.split(0).map(move => str(bytes(move)).split()),
+  )
+}
+
 #let replay-game(starting-position, turns) = {
   let game = functions.replay_game(
     bytes(starting-position.fen),
     turns.map(bytes).join(bytes((0, )))
   )
-  array(game).split(0).map(position => (
-    type: "board-n-pieces:fen",
-    fen: str(bytes(position))
-  ))
+  deserialize-game(game)
 }
 
 #let game-from-pgn(pgn) = {
   let game = functions.game_from_pgn(
     bytes(pgn),
   )
-  array(game).split(0).map(position => (
-    type: "board-n-pieces:fen",
-    fen: str(bytes(position))
-  ))
+  deserialize-game(game)
 }
 
 /// Converts a `board-n-pieces:fen-position` to a `board-n-pieces:position`.

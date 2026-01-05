@@ -288,6 +288,30 @@ impl Display for Square {
     }
 }
 
+#[derive(Copy, Clone)]
+pub struct Movement {
+    from: Square,
+    to: Square,
+}
+
+impl Movement {
+    pub fn new(from: Square, to: Square) -> Self {
+        Self { from, to }
+    }
+}
+
+impl Debug for Movement {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "Movement({})", self)
+    }
+}
+
+impl Display for Movement {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{} {}", self.from, self.to)
+    }
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Color {
     White,
