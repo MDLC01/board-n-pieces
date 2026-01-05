@@ -188,3 +188,76 @@
     curve.close(),
   )
 }
+
+#let draw-corner-arrow(
+  (start-file, start-rank),
+  (end-file, end-rank),
+  square-size,
+  arrow-thickness,
+  arrow-base-offset,
+  head-thickness,
+  head-length,
+  tip,
+  fill,
+  horizontal-first,
+) = {
+  if not horizontal-first {
+    (start-file, start-rank) = (start-rank, start-file)
+    (end-file, end-rank) = (end-rank, end-file)
+  }
+  let c = if horizontal-first { (x, y) => (x, y) } else { (y, x) => (x, y) }
+
+  let main-direction = if end-file > start-file { 1 } else { -1 }
+  let secondary-direction = if end-rank > start-rank { 1 } else { -1 }
+  let tail-x = start-file * square-size + main-direction * arrow-base-offset
+  let tail-y = start-rank * square-size
+  let tip-x = end-file * square-size
+  let tip-y = end-rank * square-size - secondary-direction * tip
+
+  curve(
+    fill: fill,
+    // Base of the arrow.
+    curve.move(c(
+      tail-x - main-direction * arrow-thickness / 2,
+      tail-y + secondary-direction * arrow-thickness / 2,
+    )),
+    curve.line(c(
+      tail-x - main-direction * arrow-thickness / 2,
+      tail-y - secondary-direction * arrow-thickness / 2,
+    )),
+    // Outside the corner.
+    curve.line(c(
+      tip-x + main-direction * arrow-thickness / 2,
+      tail-y - secondary-direction * arrow-thickness / 2,
+    )),
+    // Right before the arrow head.
+    curve.line(c(
+      tip-x + main-direction * arrow-thickness / 2,
+      tip-y - secondary-direction * head-length,
+    )),
+    // Arrow head.
+    curve.line(c(
+      tip-x + main-direction * head-thickness / 2,
+      tip-y - secondary-direction * head-length,
+    )),
+    curve.line(c(
+      tip-x,
+      tip-y,
+    )),
+    curve.line(c(
+      tip-x - main-direction * head-thickness / 2,
+      tip-y - secondary-direction * head-length,
+    )),
+    // Right after the arrow head.
+    curve.line(c(
+      tip-x - main-direction * arrow-thickness / 2,
+      tip-y - secondary-direction * head-length,
+    )),
+    // Inside the corner.
+    curve.line(c(
+      tip-x - main-direction * arrow-thickness / 2,
+      tail-y + secondary-direction * arrow-thickness / 2,
+    )),
+    curve.close(),
+  )
+}

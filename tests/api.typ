@@ -288,3 +288,18 @@
     }
   }),
 )
+
+---
+#bnp.board(
+  bnp.starting-position,
+  arrows: (
+    "d4 b3",
+    "d4 b5",
+    "d4 f3",
+    "d4 f5",
+    "d4 c2",
+    "d4 c6",
+    "d4 e2",
+    "d4 e6",
+  ),
+)

@@ -227,6 +227,7 @@
     square-name,
     stroke-sides,
     draw-straight-arrow,
+    draw-corner-arrow,
   )
 
   position = resolve-position(position)
@@ -353,17 +354,32 @@
       // Arrows are all placed in the bottom right square.
       show: place.with(center + horizon)
       show: place
-      draw-straight-arrow(
-        (start-file - width + 1, -start-rank),
-        (end-file - width + 1, -end-rank),
-        square-size,
-        arrow-thickness,
-        arrow-base-offset,
-        head-thickness,
-        head-length,
-        tip,
-        arrow-fill,
-      )
+      if calc.pow(end-file - start-file, 2) + calc.pow(end-rank - start-rank, 2) == 5 {
+        draw-corner-arrow(
+          (start-file - width + 1, -start-rank),
+          (end-file - width + 1, -end-rank),
+          square-size,
+          arrow-thickness,
+          arrow-base-offset,
+          head-thickness,
+          head-length,
+          tip,
+          arrow-fill,
+          calc.abs(end-file - start-file) == 2,
+        )
+      } else {
+        draw-straight-arrow(
+          (start-file - width + 1, -start-rank),
+          (end-file - width + 1, -end-rank),
+          square-size,
+          arrow-thickness,
+          arrow-base-offset,
+          head-thickness,
+          head-length,
+          tip,
+          arrow-fill,
+        )
+      }
     }
 
     if reverse {
