@@ -117,3 +117,74 @@
     ..sides,
   )
 }
+
+#let draw-straight-arrow(
+  (start-file, start-rank),
+  (end-file, end-rank),
+  square-size,
+  arrow-thickness,
+  arrow-base-offset,
+  head-thickness,
+  head-length,
+  tip,
+  fill,
+) = {
+  let angle = calc.atan2(end-file - start-file, end-rank - start-rank)
+  let tail-x = start-file * square-size + calc.cos(angle) * arrow-base-offset
+  let tail-y = start-rank * square-size + calc.sin(angle) * arrow-base-offset
+
+  curve(
+    fill: fill,
+    // Base of the arrow.
+    curve.move((
+      tail-x + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
+      tail-y + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
+    )),
+    curve.line((
+      tail-x + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
+      tail-y + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
+    )),
+    // Right before the arrow head.
+    curve.line((
+      end-file * square-size
+        - calc.sin(angle) * arrow-thickness / 2
+        - calc.cos(angle) * (head-length + tip),
+      end-rank * square-size
+        + calc.cos(angle) * arrow-thickness / 2
+        - calc.sin(angle) * (head-length + tip),
+    )),
+    // Arrow head.
+    curve.line((
+      end-file * square-size
+        - calc.sin(angle) * head-thickness / 2
+        - calc.cos(angle) * (head-length + tip),
+      end-rank * square-size
+        + calc.cos(angle) * head-thickness / 2
+        - calc.sin(angle) * (head-length + tip),
+    )),
+    curve.line((
+      end-file * square-size
+        - calc.cos(angle) * tip,
+      end-rank * square-size
+        - calc.sin(angle) * tip,
+    )),
+    curve.line((
+      end-file * square-size
+        + calc.sin(angle) * head-thickness / 2
+        - calc.cos(angle) * (head-length + tip),
+      end-rank * square-size
+        - calc.cos(angle) * head-thickness / 2
+        - calc.sin(angle) * (head-length + tip),
+    )),
+    // Right after the arrow head.
+    curve.line((
+      end-file * square-size
+        + calc.sin(angle) * arrow-thickness / 2
+        - calc.cos(angle) * (head-length + tip),
+      end-rank * square-size
+        - calc.cos(angle) * arrow-thickness / 2
+        - calc.sin(angle) * (head-length + tip),
+    )),
+    curve.close(),
+  )
+}

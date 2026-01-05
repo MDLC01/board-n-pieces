@@ -226,6 +226,7 @@
     square-coordinates,
     square-name,
     stroke-sides,
+    draw-straight-arrow,
   )
 
   position = resolve-position(position)
@@ -344,71 +345,24 @@
       end-rank = height - end-rank - 1
     }
 
-    let angle = calc.atan2(end-file - start-file, start-rank - end-rank)
     let head-thickness = 2 * arrow-thickness
     let head-length = 1.5 * arrow-thickness
     let tip = square-size / 6
-    let tail-x = (start-file - width + 1) * square-size + calc.cos(angle) * arrow-base-offset
-    let tail-y = -start-rank * square-size + calc.sin(angle) * arrow-base-offset
 
     let arrow = {
       // Arrows are all placed in the bottom right square.
       show: place.with(center + horizon)
       show: place
-
-      curve(
-        fill: arrow-fill,
-        // Base of the arrow.
-        curve.move((
-          tail-x + (calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
-          tail-y + (-calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
-        )),
-        curve.line((
-          tail-x + (-calc.sin(angle) - calc.cos(angle)) * arrow-thickness / 2,
-          tail-y + (calc.cos(angle) - calc.sin(angle)) * arrow-thickness / 2,
-        )),
-        // Right before the arrow head.
-        curve.line((
-          (end-file - width + 1) * square-size
-            - calc.sin(angle) * arrow-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            + calc.cos(angle) * arrow-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        // Arrow head.
-        curve.line((
-          (end-file - width + 1) * square-size
-            - calc.sin(angle) * head-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            + calc.cos(angle) * head-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        curve.line((
-          (end-file - width + 1) * square-size
-            - calc.cos(angle) * tip,
-          -end-rank * square-size
-            - calc.sin(angle) * tip,
-        )),
-        curve.line((
-          (end-file - width + 1) * square-size
-            + calc.sin(angle) * head-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            - calc.cos(angle) * head-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        // Right after the arrow head.
-        curve.line((
-          (end-file - width + 1) * square-size
-            + calc.sin(angle) * arrow-thickness / 2
-            - calc.cos(angle) * (head-length + tip),
-          -end-rank * square-size
-            - calc.cos(angle) * arrow-thickness / 2
-            - calc.sin(angle) * (head-length + tip),
-        )),
-        curve.close(),
+      draw-straight-arrow(
+        (start-file - width + 1, -start-rank),
+        (end-file - width + 1, -end-rank),
+        square-size,
+        arrow-thickness,
+        arrow-base-offset,
+        head-thickness,
+        head-length,
+        tip,
+        arrow-fill,
       )
     }
 
