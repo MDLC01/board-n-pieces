@@ -4,7 +4,7 @@
 
 /// The starting position of a standard chess game.
 #let starting-position = (
-  type: "board-n-pieces:position",
+  type: <board-n-pieces:position>,
   fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   board: (
     ("R", "N", "B", "Q", "K", "B", "N", "R"),
@@ -57,7 +57,7 @@
     }
   }
   (
-    type: "board-n-pieces:fen",
+    type: <board-n-pieces:fen>,
     fen: ranks
       .map(rank => {
         let fen-rank = ""
@@ -102,7 +102,7 @@
     fen-string = fen-string + " w KQkq - 0 1"
   }
   (
-    type: "board-n-pieces:fen",
+    type: <board-n-pieces:fen>,
     fen: fen-string,
   )
 }

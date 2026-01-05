@@ -2,7 +2,7 @@
 
 #let invert-position(position) = {
   (
-    type: "board-n-pieces:fen",
+    type: <board-n-pieces:fen>,
     fen: str(functions.invert_position(bytes(position.fen))),
   )
 }
@@ -11,7 +11,7 @@
   let (positions, moves) = array(game).split(0xff)
   (
     positions: positions.split(0).map(position => (
-      type: "board-n-pieces:fen",
+      type: <board-n-pieces:fen>,
       fen: str(bytes(position))
     )),
     moves: moves.split(0).map(move => str(bytes(move)).split()),
@@ -33,22 +33,22 @@
   deserialize-game(game)
 }
 
-/// Converts a `board-n-pieces:fen-position` to a `board-n-pieces:position`.
+/// Converts a `board-n-pieces:fen` to a `board-n-pieces:position`.
 /// For positions, this is the identity function.
 #let resolve-position(position) = {
   let message = "expected a position (hint: you can construct a position with the `position` function)"
 
   assert.eq(type(position), dictionary, message: message)
 
-  if position.type == "board-n-pieces:position" {
+  if position.type == <board-n-pieces:position> {
     return position
   }
 
-  if position.type == "board-n-pieces:fen" {
+  if position.type == <board-n-pieces:fen> {
     // A `fen` object contains a `fen` entry, which is a full fen string.
     let parts = position.fen.split(" ")
     return (
-      type: "board-n-pieces:position",
+      type: <board-n-pieces:position>,
       fen: position.fen,
       board: parts.at(0)
         .split("/")
