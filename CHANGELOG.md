@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.9.0
+
+- Knight move arrows are now angle-shaped.
+
 ## Version 0.8.0
 
 - `play` and `pgn` now return the successive moves as well.
