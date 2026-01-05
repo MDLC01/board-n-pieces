@@ -84,13 +84,13 @@ pub fn parse_fen(fen: &str) -> crate::Result<Position> {
             .next()
             .ok_or("invalid FEN: missing en passant target square")?,
     )?;
-    if let Some(square) = en_passant_target_square {
-        if square.rank() != active.en_passant_target_rank() {
-            Err(format!(
-                "invalid FEN: illegal en passant target square (invalid rank): {}",
-                square
-            ))?
-        }
+    if let Some(square) = en_passant_target_square
+        && square.rank() != active.en_passant_target_rank()
+    {
+        Err(format!(
+            "invalid FEN: illegal en passant target square (invalid rank): {}",
+            square
+        ))?
     }
 
     let halfmove = parse_int(parts.next().ok_or("invalid FEN: missing fullmove")?)?;

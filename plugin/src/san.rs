@@ -290,24 +290,20 @@ fn valid_moves(position: &Position, piece_kind: PieceKind) -> Vec<Move> {
         match piece_kind {
             PieceKind::Pawn => {
                 // Forward pawn move.
-                if let Some(destination) = departure.forward() {
-                    if position.at(destination.into()).is_empty() {
-                        moves.push(LocalMove::new(departure, destination));
-                    }
+                if let Some(destination) = departure.forward()
+                    && position.at(destination.into()).is_empty()
+                {
+                    moves.push(LocalMove::new(departure, destination));
                 }
 
                 // Initial two-square pawn move.
-                if let Some(skipped) = departure.forward() {
-                    if let Some(destination) = skipped.forward() {
-                        if departure.local_rank == Rank::Two
-                            && position.at(skipped.into()).is_empty()
-                            && position.at(destination.into()).is_empty()
-                        {
-                            moves.push(
-                                LocalMove::new(departure, destination).with_skipped_square(skipped),
-                            )
-                        }
-                    }
+                if let Some(skipped) = departure.forward()
+                    && let Some(destination) = skipped.forward()
+                    && departure.local_rank == Rank::Two
+                    && position.at(skipped.into()).is_empty()
+                    && position.at(destination.into()).is_empty()
+                {
+                    moves.push(LocalMove::new(departure, destination).with_skipped_square(skipped))
                 }
 
                 // Capture with pawn.
@@ -429,7 +425,7 @@ impl AlgebraicTurn {
         format!(
             "{}{} {}",
             index / 2 + 1,
-            if index % 2 == 0 { "." } else { "..." },
+            if index.is_multiple_of(2) { "." } else { "..." },
             self
         )
     }
@@ -614,16 +610,16 @@ fn parse_promotion(source: &str) -> crate::Result<(&str, Option<PieceKind>)> {
     }
 
     // Promotion with or without indicating symbol (e.g., "e8=Q", "e8/Q", "e8Q").
-    if let Some((prefix, c)) = source.split_last_char() {
-        if let Ok(promotion) = c.parse() {
-            return if let Some(prefix) = prefix.strip_suffix('=') {
-                Ok((prefix, Some(promotion)))
-            } else if let Some(prefix) = prefix.strip_suffix('/') {
-                Ok((prefix, Some(promotion)))
-            } else {
-                Ok((prefix, Some(promotion)))
-            };
-        }
+    if let Some((prefix, c)) = source.split_last_char()
+        && let Ok(promotion) = c.parse()
+    {
+        return if let Some(prefix) = prefix.strip_suffix('=') {
+            Ok((prefix, Some(promotion)))
+        } else if let Some(prefix) = prefix.strip_suffix('/') {
+            Ok((prefix, Some(promotion)))
+        } else {
+            Ok((prefix, Some(promotion)))
+        };
     }
 
     // No promotion.
