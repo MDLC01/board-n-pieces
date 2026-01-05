@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.8.0
+
+- `play` and `pgn` now return the successive moves as well.
+
+- Allow passing an array of pairs instead of an array of strings to `board.arrows`.
+
+- Add `square-stroke` parameter to `board`.
+
 ## Version 0.7.0
 
 - Add `invert-position` function.
