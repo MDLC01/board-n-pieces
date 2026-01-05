@@ -248,3 +248,43 @@
   stroke: 2pt + red,
   arrow-base-offset: 50%,
 )
+
+---
+#let game = bnp.play("e4 e5 Qh5 Nc6 Bc4 Nf6 Qxf7")
+#grid(
+  columns: 4,
+  gutter: 0.2cm,
+  ..game.positions.enumerate().map(((i, position)) => {
+    if i == 0 {
+      bnp.board(square-size: 0.5cm, position)
+    } else {
+      let move = game.moves.at(i - 1)
+      bnp.board(
+        marked-squares: move.first(),
+        arrows: (move,),
+        square-size: 0.5cm,
+        position,
+      )
+    }
+  }),
+)
+
+---
+#let game = bnp.play("0-0 O-O-O", starting-position: bnp.fen("r3kbnr/pppqpppp/2npb3/8/8/3BPN2/PPPP1PPP/RNBQK2R"))
+#stack(
+  dir: ltr,
+  spacing: 0.2cm,
+  ..game.positions.enumerate().map(((i, position)) => {
+    if i == 0 {
+      bnp.board(square-size: 0.5cm, position)
+    } else {
+      let move = game.moves.at(i - 1)
+      bnp.board(
+        marked-squares: move.first(),
+        arrows: (move,),
+        square-size: 0.5cm,
+        position,
+      )
+    }
+  }),
+)
