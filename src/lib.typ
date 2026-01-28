@@ -266,18 +266,23 @@
   )
 
   arrows = arrows.map(arrow => {
-    let (start, end) = if type(arrow) == str {
+    let (start, end, color) = if type(arrow) == str {
       if arrow.len() == 4 {
-        (arrow.slice(0, 2), arrow.slice(2, 4))
+        (arrow.slice(0, 2), arrow.slice(2, 4), arrow-fill)
       } else {
-        arrow.split()
+        (..arrow.split(), arrow-fill)
       }
     } else {
-      arrow
+      if arrow.len() == 3 {
+        arrow
+      } else {
+        (..arrow, arrow-fill)
+      }
     }
     (
       square-coordinates(start),
       square-coordinates(end),
+      color,
     )
   })
 
@@ -338,7 +343,7 @@
     .rev()
     .flatten()
 
-  for ((start-file, start-rank), (end-file, end-rank)) in arrows {
+  for ((start-file, start-rank), (end-file, end-rank), color) in arrows {
     if reverse {
       start-file = width - start-file - 1
       start-rank = height - start-rank - 1
@@ -364,7 +369,7 @@
           head-thickness,
           head-length,
           tip,
-          arrow-fill,
+          color,
           calc.abs(end-file - start-file) == 2,
         )
       } else {
@@ -377,7 +382,7 @@
           head-thickness,
           head-length,
           tip,
-          arrow-fill,
+          color,
         )
       }
     }

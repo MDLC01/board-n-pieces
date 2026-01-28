@@ -189,7 +189,7 @@ The `board` function lets you customize the appearance of the board in various w
     "c7 c6": marks.circle(),
     "h6": marks.cross(paint: rgb("#ffca3ad0")),
   ),
-  arrows: ("d8 c8", "d8 c7", "g1 g6", "h7 h6"),
+  arrows: (("d8", "c8", blue), "d8 c7", "g1 g6", "h7 h6"),
   display-numbers: true,
 
   white-square-fill: rgb("#d2eeea"),
@@ -207,7 +207,7 @@ Here is a list of all the available arguments:
 
 - `marked-squares` is a list of squares to mark (e.g., `("d3", "d2", "e3")`). It can also be specified as a single string containing whitespace-separated squares (e.g., `"d3 d2 e3"`). For full customization, a dictionary can be provided, where the keys are the squares, and the values the marks to use. A set of marks is available in the `marks` module: `fill`, `circle`, and `cross`.
 
-- `arrows` is a list of arrows to draw (e.g., `(("e2", "e4"), ("e7", "e5"))` or, more compactly `("e2e4", "e7e5")`).
+- `arrows` is a list of arrows to draw (e.g., `(("e2", "e4"), ("e7", "e5"))` or, more compactly `("e2 e4", "e7 e5")` or `("e2e4", "e7e5")`). You can also specify the color of an arrow by passing a triplet (e.g., `("e2", "e4", blue)`). If no color is specified, the `arrow-fill` argument is used as the color of the arrow.
 
 - `reverse` is a boolean indicating whether to reverse the board, displaying it from Black's point of view. This is `false` by default, meaning the board is displayed from White's point of view.
 
