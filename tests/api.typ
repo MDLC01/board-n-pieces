@@ -303,3 +303,16 @@
     "d4 e6",
   ),
 )
+
+---
+#bnp.board(
+  bnp.starting-position,
+  arrow-fill: orange,
+  arrows: (
+    ("e2", "e4", purple),
+    ("e7", "e5", green),
+    ("d2", "d4"), // Default color
+    "d7 d5", // Default color
+    "g1f3", // Default color
+  ),
+)
